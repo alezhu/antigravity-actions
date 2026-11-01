@@ -7,14 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2026-11-01
 
-### Added
-- **Push Action & Skill (`/push`)**: Added safe Git push workflow (`skills/push/SKILL.md`) that verifies branch, checks upstream sync status, and pushes commits.
+### 🚀 Features
+- **Push Action & Skill (`/push`)**: Added safe Git push workflow (`skills/push/SKILL.md`) that verifies current branch, checks upstream sync status, and requests confirmation before pushing.
 - **Drag-and-Drop Action Reordering**: Action cards can now be dynamically reordered via drag-and-drop.
-- **Order Persistence & Reset**: Custom action order is saved to `localStorage` and automatically restored; added reset button (`↺`) to restore the default order.
-- **Default Actions Order**: Actions are ordered by default as **Run Tests**, **Code Review**, **Commit**, **Push**, **Release**.
+- **Order Persistence & Reset**: Custom action order is saved to `localStorage` and automatically restored; added a reset button (`↺`) to restore the default order.
+- **Default Actions Order**: Standardized default action flow: **Run Tests**, **Code Review**, **Commit**, **Push**, **Release**.
+- **4 Action Execution Modes**: Support for Direct Execute via RPC, Slash Command injection, Expanded Prompt, and Clipboard Copy modes.
+- **Tabs Navigation & UI Expansion**: Added tabs for **Actions**, **Settings** (customizable execution mode, command visibility toggle), and **About** (plugin metadata, version, repository links).
+- **Internationalization (i18n)**: Full bilingual UI localization supporting English (`en`) and Russian (`ru`).
+- **Antigravity Connect RPC Integration**: Native communication with Antigravity Language Server via Connect RPC (`SendUserCascadeMessage`, `GetAllPlugins`, `GetWorkspaceDirectories`) with real-time execution status.
 
-### Removed
-- **Deploy Action & Skill (`/deploy`)**: Removed deploy workflow in favor of push.
+### 🐛 Bug Fixes
+- **Live Reload & Panel Styling**: Added auto-refresh mechanism for sidecar web UI and adjusted container padding.
+- **Concurrency & Loop Prevention**: Guarded against concurrent action runs and eliminated infinite cancel logging loops.
+- **Session & Workspace Binding**: Bound new conversations to current workspace directory and localized agent prompts.
+- **Model Assignment Protection**: Passed `plannerConfig.planModel` in cascade messages to prevent unassigned model crashes.
+- **Dynamic SDK Preload**: Resolved sidecar SDK preload path dynamically across different host environments.
+
+### 📝 Documentation & Maintenance
+- **Removed Deploy Action (`/deploy`)**: Replaced deprecated deploy workflow in favor of push.
+- **Plugin Synchronization Rule**: Added automated mirroring rules to ensure immediate sync with Antigravity installed plugins directory.
+- **Bilingual Documentation**: Updated README in both English and Russian.
 
 ## [1.0.0] - 2026-11-01
 

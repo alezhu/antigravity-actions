@@ -48,7 +48,7 @@ body {
 .container {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -75,6 +75,36 @@ h1 {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-main);
+}
+
+.workspace-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.workspace-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.workspace-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 11px;
+  font-family: monospace;
+  outline: none;
+}
+
+.workspace-input:focus {
+  color: var(--primary);
 }
 
 .section-title {
@@ -212,12 +242,16 @@ h1 {
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .btn-primary {
   background: var(--primary);
   color: #ffffff;
-  flex: 1;
+  flex: 1.2;
 }
 
 .btn-primary:hover {
@@ -228,6 +262,7 @@ h1 {
   background: rgba(255, 255, 255, 0.06);
   border-color: var(--border-color);
   color: var(--text-main);
+  flex: 1;
 }
 
 .btn-secondary:hover {
@@ -244,18 +279,18 @@ h1 {
 }
 
 .btn-small {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-color);
-  color: var(--text-muted);
+  color: var(--text-main);
   font-size: 10px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .btn-small:hover {
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--primary);
+  color: white;
 }
 
 .console-section {
@@ -279,9 +314,9 @@ h1 {
   padding: 10px;
   font-family: Consolas, Monaco, "Courier New", monospace;
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.45;
   color: #7dd3fc;
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-all;
@@ -294,14 +329,15 @@ h1 {
   transform: translateX(-50%) translateY(100px);
   background: #10b981;
   color: white;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   transition: transform 0.25s ease, opacity 0.25s ease;
   opacity: 0;
   pointer-events: none;
+  z-index: 1000;
 }
 
 .toast.show {

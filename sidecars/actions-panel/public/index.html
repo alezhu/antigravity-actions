@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antigravity Actions</title>
+  <script src="/preload.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,6 +16,13 @@
       </div>
       <button id="refreshBtn" class="btn-icon" title="Обновить статус">🔄</button>
     </header>
+
+    <!-- Workspace Selector Bar -->
+    <div class="workspace-bar">
+      <span class="workspace-label">📁 Проект:</span>
+      <input type="text" id="workspaceInput" class="workspace-input" placeholder="D:\Projects\Web\Front\antigravity-actions" />
+      <button id="setWorkspaceBtn" class="btn-small" title="Применить путь к проекту">OK</button>
+    </div>
 
     <!-- Git Status Badge -->
     <div id="statusCard" class="card status-card">
@@ -46,14 +54,14 @@
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="commitMsgInput" placeholder="Сообщение (или оставьте пустым для AI)" />
+          <input type="text" id="commitMsgInput" placeholder="Сообщение коммита (пустое = авто-генерация)" />
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" onclick="triggerAction('commit')">
-            Сделать коммит
+            ▶ Сделать коммит
           </button>
-          <button class="btn btn-secondary" onclick="copyPrompt('commit')" title="Скопировать промпт для чата агента">
-            📋 В чат
+          <button class="btn btn-secondary" onclick="sendPromptToChat('commit')" title="Отправить задачу AI-агенту в чат">
+            🤖 В чат агенту
           </button>
         </div>
       </div>
@@ -69,10 +77,10 @@
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" onclick="triggerAction('codereview')">
-            Проверить Diff
+            ▶ Проверить Diff
           </button>
-          <button class="btn btn-secondary" onclick="copyPrompt('codereview')" title="Скопировать промпт для чата агента">
-            📋 В чат
+          <button class="btn btn-secondary" onclick="sendPromptToChat('codereview')" title="Отправить задачу AI-агенту в чат">
+            🤖 В чат агенту
           </button>
         </div>
       </div>
@@ -88,10 +96,10 @@
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" onclick="triggerAction('test')">
-            Запустить тесты
+            ▶ Запустить тесты
           </button>
-          <button class="btn btn-secondary" onclick="copyPrompt('test')" title="Скопировать промпт для чата агента">
-            📋 В чат
+          <button class="btn btn-secondary" onclick="sendPromptToChat('test')" title="Отправить задачу AI-агенту в чат">
+            🤖 В чат агенту
           </button>
         </div>
       </div>
@@ -107,10 +115,10 @@
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" onclick="triggerAction('deploy')">
-            Выполнить деплой
+            ▶ Запустить деплой
           </button>
-          <button class="btn btn-secondary" onclick="copyPrompt('deploy')" title="Скопировать промпт для чата агента">
-            📋 В чат
+          <button class="btn btn-secondary" onclick="sendPromptToChat('deploy')" title="Отправить задачу AI-агенту в чат">
+            🤖 В чат агенту
           </button>
         </div>
       </div>
@@ -126,10 +134,10 @@
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" onclick="triggerAction('release')">
-            Проверить релиз
+            ▶ Проверить релиз
           </button>
-          <button class="btn btn-secondary" onclick="copyPrompt('release')" title="Скопировать промпт для чата агента">
-            📋 В чат
+          <button class="btn btn-secondary" onclick="sendPromptToChat('release')" title="Отправить задачу AI-агенту в чат">
+            🤖 В чат агенту
           </button>
         </div>
       </div>
@@ -144,7 +152,7 @@
       <pre id="consoleOutput" class="console-output">Готов к работе. Выберите действие выше.</pre>
     </section>
 
-    <div id="toast" class="toast">Скопировано в буфер!</div>
+    <div id="toast" class="toast">Готово!</div>
   </div>
 
   <script src="app.js"></script>

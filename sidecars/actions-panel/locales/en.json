@@ -23,6 +23,7 @@
     "completedToast": "✅ {label} completed!",
     "errorToast": "❌ Execution error: {label}",
     "canceledToast": "⚠️ Execution canceled: {label}",
+    "alreadyRunning": "⚠️ Another action is already running in chat. Please wait or cancel it.",
     "toastPromptCopied": "📋 Prompt copied to clipboard! Press Ctrl+V in chat.",
     "sendError": "Failed to send message",
     "connError": "Connection error. Copied prompt to clipboard (press Ctrl+V)."

@@ -253,15 +253,22 @@ function startRunningIndicator(action, meta, btn) {
   activeStartTime = Date.now();
 
   // Reset classes
-  activeCardEl.classList.remove("hidden", "success", "error");
-  activeBadgeEl.textContent = t("ui.activeRunning");
-  activeTitleEl.textContent = meta.title;
-  activeTimerEl.textContent = "0s";
+  if (activeCardEl) {
+    activeCardEl.classList.remove("hidden", "success", "error", "canceled");
+    if (activeBadgeEl) activeBadgeEl.textContent = t("ui.activeRunning");
+    if (activeTitleEl) activeTitleEl.textContent = meta.title;
+    if (activeTimerEl) activeTimerEl.textContent = "0s";
+  }
 
   // Highlight specific action card
   document.querySelectorAll(".action-card").forEach(c => c.classList.remove("running"));
   const card = document.getElementById(`card-${action}`);
   if (card) card.classList.add("running");
+
+  // Disable all execute buttons while an action is in progress to prevent duplicate requests
+  document.querySelectorAll(".btn-primary").forEach(b => {
+    b.disabled = true;
+  });
 
   // Visual indication on button
   if (btn) {
@@ -272,54 +279,78 @@ function startRunningIndicator(action, meta, btn) {
   }
 
   // Timer interval
-  clearInterval(activeTimerInterval);
+  if (activeTimerInterval) {
+    clearInterval(activeTimerInterval);
+    activeTimerInterval = null;
+  }
   activeTimerInterval = setInterval(() => {
     const elapsed = Math.round((Date.now() - activeStartTime) / 1000);
-    activeTimerEl.textContent = `${elapsed}s`;
+    if (activeTimerEl) activeTimerEl.textContent = `${elapsed}s`;
   }, 1000);
 }
 
 // Stop execution indicator and update status badge
 function stopRunningIndicator(state = "success", message = "") {
-  clearInterval(activeTimerInterval);
-  clearInterval(activePollInterval);
+  if (activeTimerInterval) {
+    clearInterval(activeTimerInterval);
+    activeTimerInterval = null;
+  }
+  if (activePollInterval) {
+    clearInterval(activePollInterval);
+    activePollInterval = null;
+  }
 
   const elapsed = Math.round((Date.now() - activeStartTime) / 1000);
 
-  // Restore button text for all buttons
+  // Restore button text and re-enable buttons
   document.querySelectorAll(".btn-primary").forEach(btn => {
     const orig = btn.getAttribute("data-orig");
     if (orig) btn.textContent = orig;
+    btn.disabled = false;
+  });
+  document.querySelectorAll(".btn-secondary").forEach(btn => {
+    btn.disabled = false;
   });
 
   // Clear card highlight
   document.querySelectorAll(".action-card").forEach(c => c.classList.remove("running"));
 
-  if (state === "success") {
-    activeCardEl.classList.remove("error");
-    activeCardEl.classList.add("success");
-    activeBadgeEl.textContent = t("ui.activeCompleted");
-    activeTitleEl.textContent = message || `${activeTitleEl.textContent} (${elapsed}s)`;
-    activeTimerEl.textContent = `${elapsed}s`;
+  if (activeCardEl) {
+    activeCardEl.classList.remove("success", "error", "canceled");
 
-    setTimeout(() => {
-      activeCardEl.classList.add("hidden");
-      activeCardEl.classList.remove("success");
-    }, 4500);
-  } else if (state === "error") {
-    activeCardEl.classList.remove("success");
-    activeCardEl.classList.add("error");
-    activeBadgeEl.textContent = t("ui.activeError");
-    activeTitleEl.textContent = message || t("ui.errorToast", { label: "" });
-    activeTimerEl.textContent = `${elapsed}s`;
+    if (state === "success") {
+      activeCardEl.classList.add("success");
+      if (activeBadgeEl) activeBadgeEl.textContent = t("ui.activeCompleted");
+      if (activeTitleEl) activeTitleEl.textContent = message || `${activeTitleEl.textContent} (${elapsed}s)`;
+      if (activeTimerEl) activeTimerEl.textContent = `${elapsed}s`;
 
-    setTimeout(() => {
+      setTimeout(() => {
+        activeCardEl.classList.add("hidden");
+        activeCardEl.classList.remove("success");
+      }, 4500);
+    } else if (state === "canceled") {
+      activeCardEl.classList.add("canceled");
+      if (activeBadgeEl) activeBadgeEl.textContent = t("ui.activeCanceled");
+      if (activeTitleEl) activeTitleEl.textContent = message || t("ui.canceledToast", { label: "" });
+      if (activeTimerEl) activeTimerEl.textContent = `${elapsed}s`;
+
+      setTimeout(() => {
+        activeCardEl.classList.add("hidden");
+        activeCardEl.classList.remove("canceled");
+      }, 4500);
+    } else if (state === "error") {
+      activeCardEl.classList.add("error");
+      if (activeBadgeEl) activeBadgeEl.textContent = t("ui.activeError");
+      if (activeTitleEl) activeTitleEl.textContent = message || t("ui.errorToast", { label: "" });
+      if (activeTimerEl) activeTimerEl.textContent = `${elapsed}s`;
+
+      setTimeout(() => {
+        activeCardEl.classList.add("hidden");
+        activeCardEl.classList.remove("error");
+      }, 5000);
+    } else {
       activeCardEl.classList.add("hidden");
-      activeCardEl.classList.remove("error");
-    }, 5000);
-  } else {
-    activeCardEl.classList.add("hidden");
-    activeCardEl.classList.remove("success", "error");
+    }
   }
 
   currentRunningAction = null;
@@ -327,11 +358,23 @@ function stopRunningIndicator(state = "success", message = "") {
 
 // Poll Language Server for completion / status of executing trajectory
 function monitorExecution(action, meta, targetConvId = null) {
+  // Always stop and clear any existing polling interval before starting a new one
+  if (activePollInterval) {
+    clearInterval(activePollInterval);
+    activePollInterval = null;
+  }
+
   let sawRunningState = false;
   let checkCount = 0;
   let initialStepCount = null;
+  let isStopped = false;
 
-  activePollInterval = setInterval(async () => {
+  const pollIntervalId = setInterval(async () => {
+    if (isStopped) {
+      clearInterval(pollIntervalId);
+      return;
+    }
+
     checkCount++;
     try {
       const convId = targetConvId || getActiveConversationId() || "";
@@ -339,47 +382,82 @@ function monitorExecution(action, meta, targetConvId = null) {
       if (!res.ok) return;
       const data = await res.json();
 
+      if (isStopped) {
+        clearInterval(pollIntervalId);
+        return;
+      }
+
       if (initialStepCount === null && typeof data.stepCount === "number") {
         initialStepCount = data.stepCount;
       }
 
-      // 1. Detect explicit error
-      if (data.isError) {
-        logToConsole(`[ERROR]: Agent terminated execution with error.`, true);
-        showToast(t("ui.errorToast", { label: meta.label }), true);
-        stopRunningIndicator("error", `Error: ${meta.title}`);
-        return;
-      }
+      // Self-cleanup helper ensuring interval is immediately destroyed
+      const stopSelf = () => {
+        isStopped = true;
+        clearInterval(pollIntervalId);
+        if (activePollInterval === pollIntervalId) {
+          activePollInterval = null;
+        }
+      };
 
-      // 2. Detect cancellation
+      // 1. Detect cancellation (Language server stopped due to user cancellation)
       if (data.isCanceled) {
-        logToConsole(`[CANCELED]: Execution of ${meta.label} was canceled.`, true);
-        showToast(t("ui.canceledToast", { label: meta.label }), true);
-        stopRunningIndicator("error", `Canceled: ${meta.title}`);
+        stopSelf();
+        try {
+          logToConsole(`[CANCELED]: Execution of ${meta.label} was canceled.`, true);
+          showToast(t("ui.canceledToast", { label: meta.label }), true);
+          stopRunningIndicator("canceled", `Canceled: ${meta.title}`);
+        } catch (e) {
+          console.error("Error handling cancellation in UI:", e);
+        }
         return;
       }
 
-      // 3. Track running state
+      // 2. Detect explicit error
+      if (data.isError) {
+        stopSelf();
+        try {
+          logToConsole(`[ERROR]: Agent terminated execution with error.`, true);
+          showToast(t("ui.errorToast", { label: meta.label }), true);
+          stopRunningIndicator("error", `Error: ${meta.title}`);
+        } catch (e) {
+          console.error("Error handling error status in UI:", e);
+        }
+        return;
+      }
+
+      // 3. Track running state and normal completion
       if (data.isRunning) {
         sawRunningState = true;
       } else if (!data.isRunning && (sawRunningState || (initialStepCount !== null && data.stepCount > initialStepCount))) {
-        // Trajectory was running and is now completed!
-        const elapsed = Math.round((Date.now() - activeStartTime) / 1000);
-        logToConsole(`[COMPLETED]: ${meta.title} completed in ${elapsed}s!`);
-        showToast(t("ui.completedToast", { label: meta.label }));
-        stopRunningIndicator("success", `✅ ${meta.title} completed (${elapsed}s)`);
+        stopSelf();
+        try {
+          const elapsed = Math.round((Date.now() - activeStartTime) / 1000);
+          logToConsole(`[COMPLETED]: ${meta.title} completed in ${elapsed}s!`);
+          showToast(t("ui.completedToast", { label: meta.label }));
+          stopRunningIndicator("success", `✅ ${meta.title} completed (${elapsed}s)`);
+        } catch (e) {
+          console.error("Error handling completion in UI:", e);
+        }
         return;
       }
 
       // 4. Safety timeout after 180 seconds
       if (checkCount > 180) {
-        stopRunningIndicator("success", `Sent: ${meta.title}`);
+        stopSelf();
+        try {
+          stopRunningIndicator("success", `Sent: ${meta.title}`);
+        } catch (e) {
+          console.error("Error handling timeout in UI:", e);
+        }
         return;
       }
     } catch (err) {
       console.warn("Polling error:", err);
     }
   }, 1000);
+
+  activePollInterval = pollIntervalId;
 }
 
 // Copy text to system clipboard with fallback
@@ -407,6 +485,12 @@ async function handleAction(action, mode = "execute", btnElement = null) {
 
   switch (mode) {
     case "execute": {
+      // Guard against concurrent execution
+      if (currentRunningAction) {
+        showToast(t("ui.alreadyRunning"), true);
+        return;
+      }
+
       // ⚡ Execute directly in chat (Enter)
       startRunningIndicator(action, meta, btn);
       logToConsole(`⚡ [EXECUTE]: ${meta.cmd}\n⏳ Dispatching to active Antigravity chat...`);

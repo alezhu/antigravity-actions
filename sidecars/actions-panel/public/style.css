@@ -126,6 +126,26 @@ h1 {
   color: #fca5a5;
 }
 
+.active-command-card.canceled {
+  border-color: var(--warning);
+  background: rgba(245, 158, 11, 0.15);
+  animation: none;
+}
+
+.active-command-card.canceled .active-command-pulse {
+  background-color: var(--warning);
+  box-shadow: 0 0 10px var(--warning);
+  animation: none;
+}
+
+.active-command-card.canceled .active-command-badge {
+  color: #fbbf24;
+}
+
+.active-command-card.canceled .active-command-timer {
+  color: #fde68a;
+}
+
 .active-command-pulse {
   width: 10px;
   height: 10px;

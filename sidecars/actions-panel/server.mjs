@@ -114,8 +114,8 @@ async function getTrajectoryStatus(conversationId) {
     const status = summary.status || "CASCADE_RUN_STATUS_UNSPECIFIED";
     const isRunning = status === "CASCADE_RUN_STATUS_RUNNING" || status === "CASCADE_RUN_STATUS_BUSY";
     const terminationReason = summary.latestExecutorTerminationReason || "";
-    const isError = terminationReason === "EXECUTOR_TERMINATION_REASON_ERROR";
-    const isCanceled = terminationReason === "EXECUTOR_TERMINATION_REASON_USER_CANCELED";
+    const isError = !isRunning && terminationReason === "EXECUTOR_TERMINATION_REASON_ERROR";
+    const isCanceled = !isRunning && terminationReason === "EXECUTOR_TERMINATION_REASON_USER_CANCELED";
 
     return {
       ok: true,

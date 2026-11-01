@@ -9,13 +9,15 @@
     "activeCompleted": "✅ ЗАВЕРШЕНО",
     "activeError": "❌ ОШИБКА",
     "activeCanceled": "⚠️ ПРЕРВАНО",
-    "bannerText": "Все действия отправляются прямо в чат агенту Antigravity:",
-    "bannerExecute": "⚡ Выполнить (сразу запускает команду)",
-    "bannerFill": "📥 Заполнить (для вставки по Ctrl+V без Enter)",
-    "btnExecute": "⚡ Выполнить (Enter)",
-    "btnFill": "📥 Заполнить (без Enter)",
-    "btnExecuteTitle": "Отправить и сразу выполнить команду агентом в чате",
-    "btnFillTitle": "Скопировать для вставки по Ctrl+V в строку чата без немедленного выполнения",
+    "bannerIntro": "Для каждой команды доступны 4 действия: <b>⚡ Execute</b> (запуск), <b>⌨️ Command</b> (вставка команды), <b>💬 Prompt</b> (вставка промпта) и <b>📋 Copy</b> (копирование обоих).",
+    "btnExecute": "⚡ Execute",
+    "btnCommand": "⌨️ Command",
+    "btnPrompt": "💬 Prompt",
+    "btnCopy": "📋 Copy",
+    "btnExecuteTitle": "Сразу отправить и запустить команду в чате",
+    "btnCommandTitle": "Скопировать слэш-команду для вставки в чат (Ctrl+V)",
+    "btnPromptTitle": "Скопировать текстовый промпт для вставки в чат (Ctrl+V)",
+    "btnCopyTitle": "Скопировать слэш-команду и полный промпт в буфер обмена",
     "historyTitle": "История действий",
     "btnClear": "Очистить",
     "readyStatus": "Готов к передаче команд в чат Antigravity.",
@@ -24,7 +26,9 @@
     "completedToast": "✅ {label} выполнено!",
     "errorToast": "❌ Ошибка выполнения {label}",
     "canceledToast": "⚠️ Выполнение {label} отменено",
-    "copiedToast": "📋 Скопировано: {cmd}. Нажмите Ctrl+V в чате!",
+    "toastCommandCopied": "📋 Команда скопирована: {cmd}. Нажмите Ctrl+V в чате!",
+    "toastPromptCopied": "💬 Промпт скопирован! Нажмите Ctrl+V в чате для редактирования.",
+    "toastBothCopied": "📋 Команда и промпт скопированы в буфер обмена!",
     "sendError": "Ошибка отправки",
     "connError": "Сбой соединения. Команда скопирована в буфер (нажмите Ctrl+V)."
   },
@@ -36,6 +40,8 @@
       "command": "/commit",
       "promptTemplate": "/commit",
       "promptTemplateWithInput": "/commit \"{input}\"",
+      "prompt": "Сделай коммит проиндексированных и измененных файлов с понятным сообщением по Conventional Commits. Проверь git diff и убедись в отсутствии секретов и временных файлов.",
+      "promptWithInput": "Сделай коммит проиндексированных и измененных файлов с понятным сообщением по Conventional Commits. Сообщение: \"{input}\". Проверь git diff и убедись в отсутствии секретов и временных файлов.",
       "displayTitle": "⚡ Commit"
     },
     "codereview": {
@@ -45,6 +51,8 @@
       "command": "/code-review",
       "promptTemplate": "/code-review",
       "promptTemplateWithInput": "/code-review {input}",
+      "prompt": "Проведи глубокий Code Review незакоммиченных изменений и текущего diff. Проверь корректность логики, безопасность, потенциальные баги, граничные случаи, производительность и кодстайл.",
+      "promptWithInput": "Проведи глубокий Code Review для {input}. Проверь корректность логики, безопасность, потенциальные баги, граничные случаи, производительность и кодстайл.",
       "displayTitle": "⚡ Code Review"
     },
     "test": {
@@ -54,6 +62,8 @@
       "command": "/run-tests",
       "promptTemplate": "/run-tests",
       "promptTemplateWithInput": "/run-tests {input}",
+      "prompt": "Определи тестовый фреймворк проекта, запусти тесты, разбери упавшие тесты, объясни первопричины ошибок и предложи исправления.",
+      "promptWithInput": "Определи тестовый фреймворк проекта и запусти тесты для {input}. Разбери упавшие тесты, объясни первопричины ошибок и предложи исправления.",
       "displayTitle": "⚡ Tests"
     },
     "deploy": {
@@ -63,6 +73,8 @@
       "command": "/deploy",
       "promptTemplate": "/deploy",
       "promptTemplateWithInput": "/deploy {input}",
+      "prompt": "Запусти безопасный процесс деплоя: проверь чистоту репозитория и текущую ветку, выполни линтер и тесты, собери продакшн-бандл и выполни деплой.",
+      "promptWithInput": "Запусти безопасный процесс деплоя для окружения {input}: проверь чистоту репозитория и ветку, выполни линтер и тесты, собери бандл и выполни деплой.",
       "displayTitle": "⚡ Deploy"
     },
     "release": {
@@ -72,6 +84,8 @@
       "command": "/release",
       "promptTemplate": "/release",
       "promptTemplateWithInput": "/release {input}",
+      "prompt": "Подготовь выпуск релиза: проанализируй историю коммитов с последнего тега, определи версию по SemVer, обнови changelog и манифесты, создай Git-тег.",
+      "promptWithInput": "Подготовь выпуск релиза ({input}): проанализируй историю коммитов с последнего тега, определи версию по SemVer, обнови changelog и манифесты, создай Git-тег.",
       "displayTitle": "⚡ Release"
     }
   }

@@ -287,14 +287,21 @@ h1 {
 }
 
 .btn-group {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 440px) {
+  .btn-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .btn {
-  padding: 7px 12px;
+  padding: 6px 8px;
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
@@ -302,7 +309,8 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .btn:disabled {
@@ -313,7 +321,6 @@ h1 {
 .btn-primary {
   background: var(--primary);
   color: #ffffff;
-  flex: 1.2;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -322,13 +329,13 @@ h1 {
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.05);
-  border-color: var(--border-color);
+  border: 1px solid var(--border-color);
   color: var(--text-main);
-  flex: 1;
 }
 
 .btn-secondary:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.12);
+  border-color: #3b4559;
 }
 
 .btn-small {

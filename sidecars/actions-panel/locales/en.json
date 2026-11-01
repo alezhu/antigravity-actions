@@ -9,13 +9,15 @@
     "activeCompleted": "✅ COMPLETED",
     "activeError": "❌ ERROR",
     "activeCanceled": "⚠️ CANCELED",
-    "bannerText": "All actions are sent directly to the Antigravity chat agent:",
-    "bannerExecute": "⚡ Execute (runs immediately)",
-    "bannerFill": "📥 Fill (copies for Ctrl+V without Enter)",
-    "btnExecute": "⚡ Execute (Enter)",
-    "btnFill": "📥 Fill (no Enter)",
-    "btnExecuteTitle": "Send and immediately execute command in chat",
-    "btnFillTitle": "Copy to clipboard for Ctrl+V in chat without immediate execution",
+    "bannerIntro": "Each action provides 4 options: <b>⚡ Execute</b> (runs immediately), <b>⌨️ Command</b> (inserts slash-command), <b>💬 Prompt</b> (inserts AI prompt), and <b>📋 Copy</b> (copies both).",
+    "btnExecute": "⚡ Execute",
+    "btnCommand": "⌨️ Command",
+    "btnPrompt": "💬 Prompt",
+    "btnCopy": "📋 Copy",
+    "btnExecuteTitle": "Execute command immediately in chat",
+    "btnCommandTitle": "Copy slash command to insert into chat (Ctrl+V)",
+    "btnPromptTitle": "Copy AI prompt to insert into chat (Ctrl+V)",
+    "btnCopyTitle": "Copy slash command and full prompt to clipboard",
     "historyTitle": "Activity Log",
     "btnClear": "Clear",
     "readyStatus": "Ready to send commands to Antigravity chat.",
@@ -24,7 +26,9 @@
     "completedToast": "✅ {label} completed!",
     "errorToast": "❌ Execution error: {label}",
     "canceledToast": "⚠️ Execution canceled: {label}",
-    "copiedToast": "📋 Copied: {cmd}. Press Ctrl+V in chat!",
+    "toastCommandCopied": "📋 Command copied: {cmd}. Press Ctrl+V in chat!",
+    "toastPromptCopied": "💬 Prompt copied! Press Ctrl+V in chat to edit or send.",
+    "toastBothCopied": "📋 Command and prompt copied to clipboard!",
     "sendError": "Failed to send message",
     "connError": "Connection error. Copied command to clipboard (press Ctrl+V)."
   },
@@ -36,6 +40,8 @@
       "command": "/commit",
       "promptTemplate": "/commit",
       "promptTemplateWithInput": "/commit \"{input}\"",
+      "prompt": "Commit staged and modified changes with a Conventional Commit message. Inspect git diff and verify that no secrets or temporary files are included.",
+      "promptWithInput": "Commit staged and modified changes with a Conventional Commit message. Message: \"{input}\". Inspect git diff and verify that no secrets or temporary files are included.",
       "displayTitle": "⚡ Commit"
     },
     "codereview": {
@@ -45,6 +51,8 @@
       "command": "/code-review",
       "promptTemplate": "/code-review",
       "promptTemplateWithInput": "/code-review {input}",
+      "prompt": "Perform a deep Code Review of uncommitted changes and current diff. Check logic correctness, security vulnerabilities, edge cases, performance, and code style.",
+      "promptWithInput": "Perform a deep Code Review of {input}. Check logic correctness, security vulnerabilities, edge cases, performance, and code style.",
       "displayTitle": "⚡ Code Review"
     },
     "test": {
@@ -54,6 +62,8 @@
       "command": "/run-tests",
       "promptTemplate": "/run-tests",
       "promptTemplateWithInput": "/run-tests {input}",
+      "prompt": "Detect the project test framework, run the test suite, analyze any failures, explain root causes, and suggest fixes.",
+      "promptWithInput": "Detect the project test framework and run tests for {input}. Analyze any failures, explain root causes, and suggest fixes.",
       "displayTitle": "⚡ Tests"
     },
     "deploy": {
@@ -63,6 +73,8 @@
       "command": "/deploy",
       "promptTemplate": "/deploy",
       "promptTemplateWithInput": "/deploy {input}",
+      "prompt": "Execute safe deployment pipeline: check git branch and clean state, run tests and linters, build artifacts, and deploy.",
+      "promptWithInput": "Execute safe deployment pipeline for environment: {input}. Check git branch and clean state, run tests and linters, build artifacts, and deploy.",
       "displayTitle": "⚡ Deploy"
     },
     "release": {
@@ -72,6 +84,8 @@
       "command": "/release",
       "promptTemplate": "/release",
       "promptTemplateWithInput": "/release {input}",
+      "prompt": "Prepare project release: analyze commit history since last tag, calculate SemVer bump, update changelog and manifest versions, and create git tag.",
+      "promptWithInput": "Prepare project release ({input}): analyze commit history since last tag, calculate SemVer bump, update changelog and manifest versions, and create git tag.",
       "displayTitle": "⚡ Release"
     }
   }

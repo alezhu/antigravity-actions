@@ -33,9 +33,9 @@
       <div class="active-command-timer" id="activeCommandTimer">0s</div>
     </div>
 
-    <div class="banner">
-      <span data-i18n="ui.bannerText">All actions are sent directly to the Antigravity chat agent:</span>
-      <b data-i18n="ui.bannerExecute">⚡ Execute (runs immediately)</b> or <b data-i18n="ui.bannerFill">📥 Fill (copies for Ctrl+V without Enter)</b>.
+    <!-- Description Banner -->
+    <div class="banner" id="bannerIntro" data-i18n-html="ui.bannerIntro">
+      Each action provides 4 options: <b>⚡ Execute</b> (runs immediately), <b>⌨️ Command</b> (inserts slash-command), <b>💬 Prompt</b> (inserts AI prompt), and <b>📋 Copy</b> (copies both).
     </div>
 
     <!-- Actions List -->
@@ -54,11 +54,17 @@
           <input type="text" id="commitInput" data-i18n-placeholder="actions.commit.placeholder" placeholder="Commit message (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-commit" onclick="handleAction('commit', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
-            ⚡ Execute (Enter)
+          <button class="btn btn-primary" id="btn-exec-commit" onclick="handleAction('commit', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('commit', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
-            📥 Fill (no Enter)
+          <button class="btn btn-secondary" onclick="handleAction('commit', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
+            ⌨️ Command
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('commit', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
+            💬 Prompt
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('commit', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+            📋 Copy
           </button>
         </div>
       </div>
@@ -76,11 +82,17 @@
           <input type="text" id="reviewInput" data-i18n-placeholder="actions.codereview.placeholder" placeholder="Files or branch to review (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-codereview" onclick="handleAction('codereview', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
-            ⚡ Execute (Enter)
+          <button class="btn btn-primary" id="btn-exec-codereview" onclick="handleAction('codereview', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('codereview', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
-            📥 Fill (no Enter)
+          <button class="btn btn-secondary" onclick="handleAction('codereview', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
+            ⌨️ Command
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('codereview', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
+            💬 Prompt
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('codereview', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+            📋 Copy
           </button>
         </div>
       </div>
@@ -98,11 +110,17 @@
           <input type="text" id="testInput" data-i18n-placeholder="actions.test.placeholder" placeholder="Test name or pattern (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-test" onclick="handleAction('test', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
-            ⚡ Execute (Enter)
+          <button class="btn btn-primary" id="btn-exec-test" onclick="handleAction('test', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('test', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
-            📥 Fill (no Enter)
+          <button class="btn btn-secondary" onclick="handleAction('test', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
+            ⌨️ Command
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('test', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
+            💬 Prompt
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('test', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+            📋 Copy
           </button>
         </div>
       </div>
@@ -120,11 +138,17 @@
           <input type="text" id="deployInput" data-i18n-placeholder="actions.deploy.placeholder" placeholder="Environment, e.g. staging or production" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-deploy" onclick="handleAction('deploy', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
-            ⚡ Execute (Enter)
+          <button class="btn btn-primary" id="btn-exec-deploy" onclick="handleAction('deploy', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('deploy', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
-            📥 Fill (no Enter)
+          <button class="btn btn-secondary" onclick="handleAction('deploy', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
+            ⌨️ Command
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('deploy', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
+            💬 Prompt
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('deploy', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+            📋 Copy
           </button>
         </div>
       </div>
@@ -142,11 +166,17 @@
           <input type="text" id="releaseInput" data-i18n-placeholder="actions.release.placeholder" placeholder="Bump type (patch, minor, major or version)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-release" onclick="handleAction('release', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
-            ⚡ Execute (Enter)
+          <button class="btn btn-primary" id="btn-exec-release" onclick="handleAction('release', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('release', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
-            📥 Fill (no Enter)
+          <button class="btn btn-secondary" onclick="handleAction('release', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
+            ⌨️ Command
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('release', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
+            💬 Prompt
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('release', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+            📋 Copy
           </button>
         </div>
       </div>

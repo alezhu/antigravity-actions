@@ -51,6 +51,12 @@ function applyTranslations() {
     el.textContent = t(key);
   });
 
+  // Rich HTML content
+  document.querySelectorAll("[data-i18n-html]").forEach(el => {
+    const key = el.getAttribute("data-i18n-html");
+    el.innerHTML = t(key);
+  });
+
   // Title / Tooltips
   document.querySelectorAll("[data-i18n-title]").forEach(el => {
     const key = el.getAttribute("data-i18n-title");
@@ -178,7 +184,7 @@ function showToast(message = "Done!", isError = false) {
   }, 3000);
 }
 
-// Build action command, title, and prompt taking active locale templates into account
+// Build action command, prompt, title, and metadata taking active locale into account
 function getActionMeta(action) {
   const actionConfig = currentTranslations.actions?.[action] || fallbackTranslations.actions?.[action] || {};
   const fallbackConfig = fallbackTranslations.actions?.[action] || {};
@@ -205,6 +211,7 @@ function getActionMeta(action) {
   const defaultCmd = fallbackConfig.command || `/${action}`;
   const baseCmd = actionConfig.command || defaultCmd;
 
+  // Build slash command
   let cmd = "";
   if (input) {
     const templateWithInput = actionConfig.promptTemplateWithInput || fallbackConfig.promptTemplateWithInput || `${baseCmd} "{input}"`;
@@ -214,11 +221,20 @@ function getActionMeta(action) {
     cmd = template.replace("{command}", baseCmd);
   }
 
+  // Build natural language prompt
+  let prompt = "";
+  if (input) {
+    const pTemplateWithInput = actionConfig.promptWithInput || fallbackConfig.promptWithInput || `${actionConfig.prompt || fallbackConfig.prompt || baseCmd}: ${input}`;
+    prompt = pTemplateWithInput.replace("{input}", input);
+  } else {
+    prompt = actionConfig.prompt || fallbackConfig.prompt || cmd;
+  }
+
   const baseTitle = actionConfig.displayTitle || fallbackConfig.displayTitle || `⚡ ${baseCmd}`;
   const title = input ? `${baseTitle}: ${input}` : baseTitle;
   const label = actionConfig.name || fallbackConfig.name || baseCmd;
 
-  return { cmd, title, label, baseCmd };
+  return { cmd, prompt, title, label, baseCmd };
 }
 
 // Start visual execution indicator banner and elapsed timer
@@ -356,54 +372,6 @@ function monitorExecution(action, meta) {
   }, 1000);
 }
 
-// Main handler for user actions (Execute immediately vs Fill clipboard)
-async function handleAction(action, immediate = true, btnElement = null) {
-  const meta = getActionMeta(action);
-  if (!meta.cmd) return;
-
-  const btn = btnElement || document.getElementById(`btn-run-${action}`) || (window.event ? window.event.currentTarget : null);
-
-  if (immediate) {
-    // ⚡ Execute directly in chat (Enter)
-    startRunningIndicator(action, meta, btn);
-    logToConsole(`⚡ [SENDING]: ${meta.cmd}\n⏳ Dispatching to active Antigravity chat...`);
-
-    try {
-      const convId = getActiveConversationId();
-      const res = await fetch("/api/send-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: meta.cmd,
-          displayTitle: meta.title,
-          conversationId: convId
-        })
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        logToConsole(`✅ Command ${meta.cmd} delivered to chat!`);
-        showToast(t("ui.executingToast", { label: meta.label }));
-        monitorExecution(action, meta);
-      } else {
-        logToConsole(`❌ [SEND ERROR]: ${data.error}`, true);
-        showToast(t("ui.sendError"), true);
-        stopRunningIndicator("error", data.error || t("ui.sendError"));
-      }
-    } catch (err) {
-      logToConsole(`❌ [ERROR]: ${err.message}. Copying command to clipboard...`, true);
-      stopRunningIndicator("error", "Connection error");
-      await copyToClipboard(meta.cmd);
-      showToast(t("ui.connError"), true);
-    }
-  } else {
-    // 📥 Fill input box (without Enter)
-    logToConsole(`📥 [PREPARED]: "${meta.cmd}"\n📋 Copied to clipboard. Paste into Antigravity chat with Ctrl+V.`);
-    await copyToClipboard(meta.cmd);
-    showToast(t("ui.copiedToast", { cmd: meta.cmd }));
-  }
-}
-
 // Copy text to system clipboard with fallback
 async function copyToClipboard(text) {
   try {
@@ -415,6 +383,89 @@ async function copyToClipboard(text) {
     textarea.select();
     document.execCommand("copy");
     document.body.removeChild(textarea);
+  }
+}
+
+// Main handler for the 4 action button modes:
+// 1. "execute": Runs command immediately in chat
+// 2. "command": Inserts slash-command into chat (copies to clipboard for Ctrl+V)
+// 3. "prompt":  Inserts AI prompt into chat (copies to clipboard for Ctrl+V)
+// 4. "copy":    Copies both slash-command and prompt to clipboard
+async function handleAction(action, mode = "execute", btnElement = null) {
+  const meta = getActionMeta(action);
+  if (!meta.cmd) return;
+
+  const btn = btnElement || document.getElementById(`btn-exec-${action}`) || (window.event ? window.event.currentTarget : null);
+
+  switch (mode) {
+    case "execute": {
+      // ⚡ Execute directly in chat (Enter)
+      startRunningIndicator(action, meta, btn);
+      logToConsole(`⚡ [EXECUTE]: ${meta.cmd}\n⏳ Dispatching to active Antigravity chat...`);
+
+      try {
+        const convId = getActiveConversationId();
+        const res = await fetch("/api/send-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: meta.cmd,
+            displayTitle: meta.title,
+            conversationId: convId
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          logToConsole(`✅ Command ${meta.cmd} delivered to chat!`);
+          showToast(t("ui.executingToast", { label: meta.label }));
+          monitorExecution(action, meta);
+        } else {
+          logToConsole(`❌ [SEND ERROR]: ${data.error}`, true);
+          showToast(t("ui.sendError"), true);
+          stopRunningIndicator("error", data.error || t("ui.sendError"));
+        }
+      } catch (err) {
+        logToConsole(`❌ [ERROR]: ${err.message}. Copying command to clipboard...`, true);
+        stopRunningIndicator("error", "Connection error");
+        await copyToClipboard(meta.cmd);
+        showToast(t("ui.connError"), true);
+      }
+      break;
+    }
+
+    case "command": {
+      // ⌨️ Command: copy slash command to insert into chat (Ctrl+V) without Enter
+      logToConsole(`⌨️ [COMMAND]: "${meta.cmd}"\n📋 Copied to clipboard. Paste into chat via Ctrl+V.`);
+      await copyToClipboard(meta.cmd);
+      // Attempt postMessage to parent frame as progressive enhancement
+      try {
+        window.parent?.postMessage({ type: "insert-chat", text: meta.cmd }, "*");
+      } catch {}
+      showToast(t("ui.toastCommandCopied", { cmd: meta.cmd }));
+      break;
+    }
+
+    case "prompt": {
+      // 💬 Prompt: copy AI prompt to insert into chat (Ctrl+V) without Enter
+      logToConsole(`💬 [PROMPT]: "${meta.prompt}"\n📋 Copied to clipboard. Paste into chat via Ctrl+V.`);
+      await copyToClipboard(meta.prompt);
+      // Attempt postMessage to parent frame as progressive enhancement
+      try {
+        window.parent?.postMessage({ type: "insert-chat", text: meta.prompt }, "*");
+      } catch {}
+      showToast(t("ui.toastPromptCopied"));
+      break;
+    }
+
+    case "copy": {
+      // 📋 Copy: copy slash command AND its full prompt together
+      const combined = `${meta.cmd}\n\n${meta.prompt}`;
+      logToConsole(`📋 [COPY]: Slash command & prompt copied to clipboard:\n${combined}`);
+      await copyToClipboard(combined);
+      showToast(t("ui.toastBothCopied"));
+      break;
+    }
   }
 }
 

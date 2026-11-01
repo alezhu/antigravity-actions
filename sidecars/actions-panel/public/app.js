@@ -195,17 +195,17 @@ function getActionMeta(action) {
 
   let input = "";
   switch (action) {
-    case "commit":
-      input = document.getElementById("commitInput")?.value.trim() || "";
+    case "test":
+      input = document.getElementById("testInput")?.value.trim() || "";
       break;
     case "codereview":
       input = document.getElementById("reviewInput")?.value.trim() || "";
       break;
-    case "test":
-      input = document.getElementById("testInput")?.value.trim() || "";
+    case "commit":
+      input = document.getElementById("commitInput")?.value.trim() || "";
       break;
-    case "deploy":
-      input = document.getElementById("deployInput")?.value.trim() || "";
+    case "push":
+      input = document.getElementById("pushInput")?.value.trim() || "";
       break;
     case "release":
       input = document.getElementById("releaseInput")?.value.trim() || "";
@@ -562,7 +562,138 @@ async function handleAction(action, mode = "execute", btnElement = null) {
   }
 }
 
+// Actions Order & Drag-and-Drop Management
+const DEFAULT_ACTION_ORDER = ["test", "codereview", "commit", "push", "release"];
+
+function getActionsContainer() {
+  return document.getElementById("actionsList") || document.querySelector(".actions-section");
+}
+
+function saveCardOrder() {
+  const container = getActionsContainer();
+  if (!container) return;
+  const cards = container.querySelectorAll(".action-card");
+  const order = Array.from(cards)
+    .map(c => c.getAttribute("data-action"))
+    .filter(Boolean);
+  try {
+    localStorage.setItem("antigravity_actions_order", JSON.stringify(order));
+  } catch (err) {
+    console.warn("Failed to save card order:", err);
+  }
+}
+
+function restoreCardOrder() {
+  const container = getActionsContainer();
+  if (!container) return;
+
+  let order = DEFAULT_ACTION_ORDER;
+  try {
+    const saved = localStorage.getItem("antigravity_actions_order");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const validSaved = parsed.filter(act => DEFAULT_ACTION_ORDER.includes(act));
+        const missing = DEFAULT_ACTION_ORDER.filter(act => !validSaved.includes(act));
+        order = [...validSaved, ...missing];
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load saved card order:", err);
+  }
+
+  order.forEach(act => {
+    const card = document.getElementById(`card-${act}`);
+    if (card && container.contains(card)) {
+      container.appendChild(card);
+    }
+  });
+}
+
+function resetCardOrder() {
+  try {
+    localStorage.removeItem("antigravity_actions_order");
+  } catch {}
+  const container = getActionsContainer();
+  if (container) {
+    DEFAULT_ACTION_ORDER.forEach(act => {
+      const card = document.getElementById(`card-${act}`);
+      if (card && container.contains(card)) {
+        container.appendChild(card);
+      }
+    });
+  }
+  showToast(t("ui.orderResetToast"));
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll(".action-card:not(.dragging)")];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+let draggedCard = null;
+
+function initDragAndDrop() {
+  const container = getActionsContainer();
+  if (!container) return;
+
+  const cards = container.querySelectorAll(".action-card");
+  cards.forEach(card => {
+    card.setAttribute("draggable", "true");
+
+    card.addEventListener("dragstart", (e) => {
+      // Prevent drag initiation when clicking on interactive controls (inputs, buttons, links)
+      if (e.target.closest("input, button, select, textarea, a")) {
+        e.preventDefault();
+        return;
+      }
+      draggedCard = card;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", card.getAttribute("data-action") || "");
+      setTimeout(() => {
+        if (draggedCard === card) {
+          card.classList.add("dragging");
+        }
+      }, 0);
+    });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      draggedCard = null;
+      saveCardOrder();
+    });
+  });
+
+  container.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (!draggedCard) return;
+
+    const afterElement = getDragAfterElement(container, e.clientY);
+    if (afterElement == null) {
+      container.appendChild(draggedCard);
+    } else {
+      container.insertBefore(draggedCard, afterElement);
+    }
+  });
+}
+
+// Expose handlers globally for HTML attributes
+window.handleAction = handleAction;
+window.clearConsole = clearConsole;
+window.resetCardOrder = resetCardOrder;
+
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
+  restoreCardOrder();
+  initDragAndDrop();
   initI18n();
 });

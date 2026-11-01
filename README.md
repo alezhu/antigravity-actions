@@ -5,24 +5,24 @@
 
 English | [Русский](README.ru.md)
 
-A productivity plugin for Google Antigravity that adds one-click developer workflows: **Commit**, **Code Review**, **Run Tests**, **Deploy**, and **Release**.
+A productivity plugin for Google Antigravity that adds one-click developer workflows: **Run Tests**, **Code Review**, **Commit**, **Push**, and **Release**.
 
 ---
 
 ## Features
 
 ### 1. Interactive Auxiliary Pane (UI Sidecar)
-* **Real-time Workspace Status**: Displays active Git branch, staged/modified file counts, and the last commit.
+* **Drag-and-Drop Reordering**: Easily reorder action cards by dragging them; custom order is automatically saved and persisted. Default order: **Run Tests**, **Code Review**, **Commit**, **Push**, **Release**. Includes one-click reset (`↺`).
 * **One-Click Actions**: Trigger actions directly or copy ready-to-use AI prompts into chat with a single click.
 * **Internationalization (i18n)**: English default with Russian localization included, dynamic language switcher, translatable command prompts, and automatic fallback to English for missing keys.
 * **Integrated Console**: View command outputs and status logs directly in the side pane.
 * **Native Theme Matching**: Adapts seamlessly to light and dark Antigravity themes.
 
 ### 2. Built-in Skills & Slash Commands
-* `/commit` — Inspects `git diff`, creates a descriptive Conventional Commit message, and commits.
-* `/code-review` — Performs an in-depth review of uncommitted changes (logic errors, security vulnerabilities, edge cases, and code style).
 * `/run-tests` — Automatically detects the project test runner, executes tests, and diagnoses failures.
-* `/deploy` — Runs pre-flight checks (clean workspace, passing tests, successful build) before deployment.
+* `/code-review` — Performs an in-depth review of uncommitted changes (logic errors, security vulnerabilities, edge cases, and code style).
+* `/commit` — Inspects `git diff`, creates a descriptive Conventional Commit message, and commits.
+* `/push` — Safely pushes committed changes to the remote repository.
 * `/release` — Determines the next SemVer version, updates changelog, and creates an annotated Git tag.
 
 ### 3. Suggested Prompt Chips
@@ -62,7 +62,7 @@ git clone https://github.com/alezhu/antigravity-actions.git .agents/plugins/anti
    ```markdown
    [⚡ Actions Panel](sidecar://antigravity-actions/actions-panel)
    ```
-2. **Use Slash Commands**: In the chat input, type `/` and choose from `/commit`, `/code-review`, `/run-tests`, `/deploy`, or `/release`.
+2. **Use Slash Commands**: In the chat input, type `/` and choose from `/run-tests`, `/code-review`, `/commit`, `/push`, or `/release`.
 3. **Use Prompt Chips**: Click on any of the suggested prompt chips appearing above or within the conversation.
 
 ---
@@ -80,10 +80,10 @@ antigravity-actions/
 ├── assets/
 │   └── logo.svg                # Plugin icon
 ├── skills/                     # Antigravity Skills
-│   ├── commit/SKILL.md
-│   ├── code-review/SKILL.md
 │   ├── run-tests/SKILL.md
-│   ├── deploy/SKILL.md
+│   ├── code-review/SKILL.md
+│   ├── commit/SKILL.md
+│   ├── push/SKILL.md
 │   └── release/SKILL.md
 └── sidecars/
     └── actions-panel/          # Sidecar Web UI

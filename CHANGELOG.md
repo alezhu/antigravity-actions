@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-01
+
+### Added
+- **Push Action & Skill (`/push`)**: Added safe Git push workflow (`skills/push/SKILL.md`) that verifies branch, checks upstream sync status, and pushes commits.
+- **Drag-and-Drop Action Reordering**: Action cards can now be dynamically reordered via drag-and-drop.
+- **Order Persistence & Reset**: Custom action order is saved to `localStorage` and automatically restored; added reset button (`↺`) to restore the default order.
+- **Default Actions Order**: Actions are ordered by default as **Run Tests**, **Code Review**, **Commit**, **Push**, **Release**.
+
+### Removed
+- **Deploy Action & Skill (`/deploy`)**: Removed deploy workflow in favor of push.
+
 ## [1.0.0] - 2026-11-01
 
 ### Added

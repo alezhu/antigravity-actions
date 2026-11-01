@@ -10,7 +10,7 @@
     "activeCompleted": "✅ COMPLETED",
     "activeError": "❌ ERROR",
     "activeCanceled": "⚠️ CANCELED",
-    "bannerIntro": "All actions can be sent directly to Antigravity chat: <b>⚡ Execute</b> (runs immediately) or <b>📋 Copy</b> (copies AI prompt to clipboard for Ctrl+V).",
+    "bannerIntro": "All actions can be sent directly to Antigravity chat: <b>⚡ Execute</b> (runs immediately) or <b>📋 Copy</b> (copies AI prompt to clipboard for Ctrl+V). Drag cards to reorder.",
     "btnExecute": "⚡ Execute",
     "btnCopy": "📋 Copy",
     "btnExecuteTitle": "Execute command immediately in chat",
@@ -26,19 +26,23 @@
     "alreadyRunning": "⚠️ Another action is already running in chat. Please wait or cancel it.",
     "toastPromptCopied": "📋 Prompt copied to clipboard! Press Ctrl+V in chat.",
     "sendError": "Failed to send message",
-    "connError": "Connection error. Copied prompt to clipboard (press Ctrl+V)."
+    "connError": "Connection error. Copied prompt to clipboard (press Ctrl+V).",
+    "dragHandleTitle": "Drag to reorder",
+    "btnResetOrder": "↺",
+    "btnResetOrderTitle": "Reset actions order to default",
+    "orderResetToast": "Actions order reset to default"
   },
   "actions": {
-    "commit": {
-      "name": "Commit",
-      "desc": "/commit — Conventional Commit based on git diff analysis",
-      "placeholder": "Commit message (optional)",
-      "command": "/commit",
-      "promptTemplate": "/commit",
-      "promptTemplateWithInput": "/commit \"{input}\"",
-      "prompt": "Commit staged and modified changes with a Conventional Commit message. Inspect git diff and verify that no secrets or temporary files are included.",
-      "promptWithInput": "Commit staged and modified changes with a Conventional Commit message. Message: \"{input}\". Inspect git diff and verify that no secrets or temporary files are included.",
-      "displayTitle": "⚡ Commit"
+    "test": {
+      "name": "Run Tests",
+      "desc": "/run-tests — run project test suite and diagnose failures",
+      "placeholder": "Test name or pattern (optional)",
+      "command": "/run-tests",
+      "promptTemplate": "/run-tests",
+      "promptTemplateWithInput": "/run-tests {input}",
+      "prompt": "Detect the project test framework, run the test suite, analyze any failures, explain root causes, and suggest fixes.",
+      "promptWithInput": "Detect the project test framework and run tests for {input}. Analyze any failures, explain root causes, and suggest fixes.",
+      "displayTitle": "⚡ Tests"
     },
     "codereview": {
       "name": "Code Review",
@@ -51,27 +55,27 @@
       "promptWithInput": "Perform a deep Code Review of {input}. Check logic correctness, security vulnerabilities, edge cases, performance, and code style.",
       "displayTitle": "⚡ Code Review"
     },
-    "test": {
-      "name": "Run Tests",
-      "desc": "/run-tests — run project test suite and diagnose failures",
-      "placeholder": "Test name or pattern (optional)",
-      "command": "/run-tests",
-      "promptTemplate": "/run-tests",
-      "promptTemplateWithInput": "/run-tests {input}",
-      "prompt": "Detect the project test framework, run the test suite, analyze any failures, explain root causes, and suggest fixes.",
-      "promptWithInput": "Detect the project test framework and run tests for {input}. Analyze any failures, explain root causes, and suggest fixes.",
-      "displayTitle": "⚡ Tests"
+    "commit": {
+      "name": "Commit",
+      "desc": "/commit — Conventional Commit based on git diff analysis",
+      "placeholder": "Commit message (optional)",
+      "command": "/commit",
+      "promptTemplate": "/commit",
+      "promptTemplateWithInput": "/commit \"{input}\"",
+      "prompt": "Commit staged and modified changes with a Conventional Commit message. Inspect git diff and verify that no secrets or temporary files are included.",
+      "promptWithInput": "Commit staged and modified changes with a Conventional Commit message. Message: \"{input}\". Inspect git diff and verify that no secrets or temporary files are included.",
+      "displayTitle": "⚡ Commit"
     },
-    "deploy": {
-      "name": "Deploy",
-      "desc": "/deploy — build and safe project deployment pipeline",
-      "placeholder": "Environment, e.g. staging or production",
-      "command": "/deploy",
-      "promptTemplate": "/deploy",
-      "promptTemplateWithInput": "/deploy {input}",
-      "prompt": "Execute safe deployment pipeline: check git branch and clean state, run tests and linters, build artifacts, and deploy.",
-      "promptWithInput": "Execute safe deployment pipeline for environment: {input}. Check git branch and clean state, run tests and linters, build artifacts, and deploy.",
-      "displayTitle": "⚡ Deploy"
+    "push": {
+      "name": "Push",
+      "desc": "/push — push committed changes to remote repository",
+      "placeholder": "Remote branch or flags, e.g. origin main (optional)",
+      "command": "/push",
+      "promptTemplate": "/push",
+      "promptTemplateWithInput": "/push {input}",
+      "prompt": "Push committed changes to the remote repository. Check current branch, verify unpushed commits, and execute git push.",
+      "promptWithInput": "Push committed changes to the remote repository for {input}. Check current branch, verify unpushed commits, and execute git push.",
+      "displayTitle": "⚡ Push"
     },
     "release": {
       "name": "Release",

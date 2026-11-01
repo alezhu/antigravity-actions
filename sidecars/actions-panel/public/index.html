@@ -15,6 +15,7 @@
         <h1 data-i18n="ui.title">Antigravity Actions</h1>
       </div>
       <div class="header-controls">
+        <button id="btnResetOrder" class="btn-small btn-icon" onclick="resetCardOrder()" data-i18n="ui.btnResetOrder" data-i18n-title="ui.btnResetOrderTitle" title="Reset actions order to default">↺</button>
         <select id="langSelect" class="lang-select" aria-label="Select language" title="Select language">
           <option value="en">English</option>
           <option value="ru">Русский</option>
@@ -35,59 +36,16 @@
 
     <!-- Description Banner -->
     <div class="banner" id="bannerIntro" data-i18n-html="ui.bannerIntro">
-      All actions can be sent directly to Antigravity chat: <b>⚡ Execute</b> (runs immediately) or <b>📋 Copy</b> (copies AI prompt to clipboard for Ctrl+V).
+      All actions can be sent directly to Antigravity chat: <b>⚡ Execute</b> (runs immediately) or <b>📋 Copy</b> (copies AI prompt to clipboard for Ctrl+V). Drag cards to reorder.
     </div>
 
     <!-- Actions List -->
-    <section class="actions-section">
-
-      <!-- Commit Action -->
-      <div class="action-card" id="card-commit">
-        <div class="action-header">
-          <span class="action-icon">📝</span>
-          <div class="action-info">
-            <span class="action-name" data-i18n="actions.commit.name">Commit</span>
-            <span class="action-desc" data-i18n="actions.commit.desc">/commit — Conventional Commit based on git diff analysis</span>
-          </div>
-        </div>
-        <div class="action-inputs">
-          <input type="text" id="commitInput" data-i18n-placeholder="actions.commit.placeholder" placeholder="Commit message (optional)" />
-        </div>
-        <div class="btn-group">
-          <button class="btn btn-primary" id="btn-exec-commit" onclick="handleAction('commit', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
-            ⚡ Execute
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('commit', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
-            📋 Copy
-          </button>
-        </div>
-      </div>
-
-      <!-- Code Review Action -->
-      <div class="action-card" id="card-codereview">
-        <div class="action-header">
-          <span class="action-icon">🔍</span>
-          <div class="action-info">
-            <span class="action-name" data-i18n="actions.codereview.name">Code Review</span>
-            <span class="action-desc" data-i18n="actions.codereview.desc">/code-review — deep review of changes, bugs, and code style</span>
-          </div>
-        </div>
-        <div class="action-inputs">
-          <input type="text" id="reviewInput" data-i18n-placeholder="actions.codereview.placeholder" placeholder="Files or branch to review (optional)" />
-        </div>
-        <div class="btn-group">
-          <button class="btn btn-primary" id="btn-exec-codereview" onclick="handleAction('codereview', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
-            ⚡ Execute
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('codereview', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
-            📋 Copy
-          </button>
-        </div>
-      </div>
+    <section class="actions-section" id="actionsList">
 
       <!-- Run Tests Action -->
-      <div class="action-card" id="card-test">
+      <div class="action-card" id="card-test" data-action="test" draggable="true">
         <div class="action-header">
+          <span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.dragHandleTitle" aria-label="Drag to reorder">⠿</span>
           <span class="action-icon">🧪</span>
           <div class="action-info">
             <span class="action-name" data-i18n="actions.test.name">Run Tests</span>
@@ -107,31 +65,79 @@
         </div>
       </div>
 
-      <!-- Deploy Action -->
-      <div class="action-card" id="card-deploy">
+      <!-- Code Review Action -->
+      <div class="action-card" id="card-codereview" data-action="codereview" draggable="true">
         <div class="action-header">
-          <span class="action-icon">🚀</span>
+          <span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.dragHandleTitle" aria-label="Drag to reorder">⠿</span>
+          <span class="action-icon">🔍</span>
           <div class="action-info">
-            <span class="action-name" data-i18n="actions.deploy.name">Deploy</span>
-            <span class="action-desc" data-i18n="actions.deploy.desc">/deploy — build and safe project deployment pipeline</span>
+            <span class="action-name" data-i18n="actions.codereview.name">Code Review</span>
+            <span class="action-desc" data-i18n="actions.codereview.desc">/code-review — deep review of changes, bugs, and code style</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="deployInput" data-i18n-placeholder="actions.deploy.placeholder" placeholder="Environment, e.g. staging or production" />
+          <input type="text" id="reviewInput" data-i18n-placeholder="actions.codereview.placeholder" placeholder="Files or branch to review (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-exec-deploy" onclick="handleAction('deploy', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+          <button class="btn btn-primary" id="btn-exec-codereview" onclick="handleAction('codereview', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
             ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('deploy', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
+          <button class="btn btn-secondary" onclick="handleAction('codereview', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
+            📋 Copy
+          </button>
+        </div>
+      </div>
+
+      <!-- Commit Action -->
+      <div class="action-card" id="card-commit" data-action="commit" draggable="true">
+        <div class="action-header">
+          <span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.dragHandleTitle" aria-label="Drag to reorder">⠿</span>
+          <span class="action-icon">📝</span>
+          <div class="action-info">
+            <span class="action-name" data-i18n="actions.commit.name">Commit</span>
+            <span class="action-desc" data-i18n="actions.commit.desc">/commit — Conventional Commit based on git diff analysis</span>
+          </div>
+        </div>
+        <div class="action-inputs">
+          <input type="text" id="commitInput" data-i18n-placeholder="actions.commit.placeholder" placeholder="Commit message (optional)" />
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-exec-commit" onclick="handleAction('commit', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('commit', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
+            📋 Copy
+          </button>
+        </div>
+      </div>
+
+      <!-- Push Action -->
+      <div class="action-card" id="card-push" data-action="push" draggable="true">
+        <div class="action-header">
+          <span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.dragHandleTitle" aria-label="Drag to reorder">⠿</span>
+          <span class="action-icon">🚀</span>
+          <div class="action-info">
+            <span class="action-name" data-i18n="actions.push.name">Push</span>
+            <span class="action-desc" data-i18n="actions.push.desc">/push — push committed changes to remote repository</span>
+          </div>
+        </div>
+        <div class="action-inputs">
+          <input type="text" id="pushInput" data-i18n-placeholder="actions.push.placeholder" placeholder="Remote branch or flags (optional)" />
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-exec-push" onclick="handleAction('push', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
+            ⚡ Execute
+          </button>
+          <button class="btn btn-secondary" onclick="handleAction('push', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
             📋 Copy
           </button>
         </div>
       </div>
 
       <!-- Release Action -->
-      <div class="action-card" id="card-release">
+      <div class="action-card" id="card-release" data-action="release" draggable="true">
         <div class="action-header">
+          <span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.dragHandleTitle" aria-label="Drag to reorder">⠿</span>
           <span class="action-icon">🏷️</span>
           <div class="action-info">
             <span class="action-name" data-i18n="actions.release.name">Release</span>

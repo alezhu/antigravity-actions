@@ -3,6 +3,7 @@ import { readFile, stat, existsSync } from "node:fs";
 import { promisify } from "node:util";
 import { join, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import os from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, "public");
@@ -249,7 +250,8 @@ const server = createServer(async (req, res) => {
 
   // Preload.js bridge for sidecars
   if (url.pathname === "/preload.js") {
-    const sdkPreload = "C:/Users/alezhur/.gemini/antigravity/lib/node_modules/sidecar_sdk/preload.js";
+    const appDataDir = process.env.ANTIGRAVITY_APP_DATA_DIR || join(os.homedir(), ".gemini", "antigravity");
+    const sdkPreload = join(appDataDir, "lib", "node_modules", "sidecar_sdk", "preload.js");
     let content = "";
     if (existsSync(sdkPreload)) {
       try { content = await readFileAsync(sdkPreload, "utf-8"); } catch {}

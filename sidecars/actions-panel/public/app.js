@@ -34,67 +34,46 @@ function showToast(message = "Выполнено!", isError = false) {
   }, 3000);
 }
 
-function setAllRunButtonsDisabled(disabled) {
-  document.querySelectorAll(".btn-primary").forEach(btn => {
-    btn.disabled = disabled;
-    if (disabled) {
-      if (!btn.getAttribute("data-orig")) {
-        btn.setAttribute("data-orig", btn.textContent);
-      }
-    } else {
-      const orig = btn.getAttribute("data-orig");
-      if (orig) btn.textContent = orig;
-    }
-  });
-}
-
 function getActionMeta(action) {
   switch (action) {
     case "commit": {
       const msg = document.getElementById("commitInput").value.trim();
-      const cmd = msg ? `⚡ Выполни /commit: "${msg}"` : "⚡ Выполни /commit";
-      const clipboardCmd = msg ? `/commit ${msg}` : "/commit";
-      const title = msg ? `⚡ /commit: "${msg}"` : "⚡ /commit";
-      return { cmd, clipboardCmd, title, label: "/commit" };
+      const cmd = msg ? `/commit "${msg}"` : "/commit";
+      const title = msg ? `⚡ Commit: "${msg}"` : "⚡ /commit";
+      return { cmd, title, label: "/commit" };
     }
     case "codereview": {
       const target = document.getElementById("reviewInput").value.trim();
-      const cmd = target ? `⚡ Выполни /code-review для: ${target}` : "⚡ Выполни /code-review";
-      const clipboardCmd = target ? `/code-review ${target}` : "/code-review";
-      const title = target ? `⚡ /code-review: ${target}` : "⚡ /code-review";
-      return { cmd, clipboardCmd, title, label: "/code-review" };
+      const cmd = target ? `/code-review ${target}` : "/code-review";
+      const title = target ? `⚡ Code Review: ${target}` : "⚡ /code-review";
+      return { cmd, title, label: "/code-review" };
     }
     case "test": {
       const filter = document.getElementById("testInput").value.trim();
-      const cmd = filter ? `⚡ Выполни /run-tests: ${filter}` : "⚡ Выполни /run-tests";
-      const clipboardCmd = filter ? `/run-tests ${filter}` : "/run-tests";
-      const title = filter ? `⚡ /run-tests: ${filter}` : "⚡ /run-tests";
-      return { cmd, clipboardCmd, title, label: "/run-tests" };
+      const cmd = filter ? `/run-tests ${filter}` : "/run-tests";
+      const title = filter ? `⚡ Tests: ${filter}` : "⚡ /run-tests";
+      return { cmd, title, label: "/run-tests" };
     }
     case "deploy": {
       const env = document.getElementById("deployInput").value.trim();
-      const cmd = env ? `⚡ Выполни /deploy --env=${env}` : "⚡ Выполни /deploy";
-      const clipboardCmd = env ? `/deploy --env=${env}` : "/deploy";
-      const title = env ? `⚡ /deploy: ${env}` : "⚡ /deploy";
-      return { cmd, clipboardCmd, title, label: "/deploy" };
+      const cmd = env ? `/deploy ${env}` : "/deploy";
+      const title = env ? `⚡ Deploy: ${env}` : "⚡ /deploy";
+      return { cmd, title, label: "/deploy" };
     }
     case "release": {
       const ver = document.getElementById("releaseInput").value.trim();
-      const cmd = ver ? `⚡ Выполни /release ${ver}` : "⚡ Выполни /release";
-      const clipboardCmd = ver ? `/release ${ver}` : "/release";
-      const title = ver ? `⚡ /release: ${ver}` : "⚡ /release";
-      return { cmd, clipboardCmd, title, label: "/release" };
+      const cmd = ver ? `/release ${ver}` : "/release";
+      const title = ver ? `⚡ Release: ${ver}` : "⚡ /release";
+      return { cmd, title, label: "/release" };
     }
     default:
-      return { cmd: "", clipboardCmd: "", title: "", label: "" };
+      return { cmd: "", title: "", label: "" };
   }
 }
 
-function startRunningIndicator(action, meta) {
+function startRunningIndicator(action, meta, btn) {
   currentRunningAction = action;
   activeStartTime = Date.now();
-
-  setAllRunButtonsDisabled(true);
 
   // Reset classes
   activeCardEl.classList.remove("hidden", "success", "error");
@@ -106,6 +85,14 @@ function startRunningIndicator(action, meta) {
   document.querySelectorAll(".action-card").forEach(c => c.classList.remove("running"));
   const card = document.getElementById(`card-${action}`);
   if (card) card.classList.add("running");
+
+  // Visual indication on button
+  if (btn) {
+    if (!btn.getAttribute("data-orig")) {
+      btn.setAttribute("data-orig", btn.textContent);
+    }
+    btn.textContent = `⏳ ${meta.label}...`;
+  }
 
   // Timer interval
   clearInterval(activeTimerInterval);
@@ -120,7 +107,12 @@ function stopRunningIndicator(state = "success", message = "") {
   clearInterval(activePollInterval);
 
   const elapsed = Math.round((Date.now() - activeStartTime) / 1000);
-  setAllRunButtonsDisabled(false);
+
+  // Restore button text for all buttons
+  document.querySelectorAll(".btn-primary").forEach(btn => {
+    const orig = btn.getAttribute("data-orig");
+    if (orig) btn.textContent = orig;
+  });
 
   // Clear card highlight
   document.querySelectorAll(".action-card").forEach(c => c.classList.remove("running"));
@@ -140,13 +132,13 @@ function stopRunningIndicator(state = "success", message = "") {
     activeCardEl.classList.remove("success");
     activeCardEl.classList.add("error");
     activeBadgeEl.textContent = "❌ ОШИБКА";
-    activeTitleEl.textContent = message || "Команда остановлена из-за ошибки";
+    activeTitleEl.textContent = message || "Команда завершилась с ошибкой";
     activeTimerEl.textContent = `${elapsed}с`;
 
     setTimeout(() => {
       activeCardEl.classList.add("hidden");
       activeCardEl.classList.remove("error");
-    }, 6000);
+    }, 5000);
   } else {
     activeCardEl.classList.add("hidden");
     activeCardEl.classList.remove("success", "error");
@@ -155,7 +147,7 @@ function stopRunningIndicator(state = "success", message = "") {
   currentRunningAction = null;
 }
 
-function monitorExecution(action, meta, btn) {
+function monitorExecution(action, meta) {
   let sawRunningState = false;
   let checkCount = 0;
   let initialStepCount = null;
@@ -174,9 +166,9 @@ function monitorExecution(action, meta, btn) {
 
       // 1. Detect explicit error
       if (data.isError) {
-        logToConsole(`❌ [ОШИБКА]: Агент завершил выполнение с ошибкой (Execution error).`, true);
+        logToConsole(`❌ [ОШИБКА]: Агент завершил выполнение с ошибкой.`, true);
         showToast(`❌ Ошибка выполнения ${meta.label}`, true);
-        stopRunningIndicator("error", `Ошибка выполнения: ${meta.title}`);
+        stopRunningIndicator("error", `Ошибка: ${meta.title}`);
         return;
       }
 
@@ -200,17 +192,9 @@ function monitorExecution(action, meta, btn) {
         return;
       }
 
-      // 4. Quick termination or timeout check
-      if (checkCount > 5 && !data.isRunning && !sawRunningState && initialStepCount !== null && data.stepCount === initialStepCount) {
-        // Command was never started or stopped immediately without steps
-        logToConsole(`⚠️ [НЕ ЗАПУЩЕНО]: Статус выполнения не изменился.`, true);
-        stopRunningIndicator("error", `Команда не была начата`);
-        return;
-      }
-
-      // 5. Safety timeout after 180 seconds
+      // 4. Safety timeout after 180 seconds
       if (checkCount > 180) {
-        stopRunningIndicator("success", `Команда передана: ${meta.title}`);
+        stopRunningIndicator("success", `Команда отправлена: ${meta.title}`);
         return;
       }
     } catch (err) {
@@ -227,15 +211,8 @@ async function handleAction(action, immediate = true, btnElement = null) {
 
   if (immediate) {
     // ⚡ Выполнить сразу в чате (Enter)
-    if (currentRunningAction) {
-      showToast("⏳ Уже выполняется другая команда. Пожалуйста, подождите.", true);
-      return;
-    }
-
-    startRunningIndicator(action, meta);
-    if (btn) btn.textContent = `⏳ Выполняется ${meta.label}...`;
-
-    logToConsole(`⚡ [ЗАПУСК КОМАНДЫ]: ${meta.cmd}\n⏳ Отправка в активный диалог Antigravity...`);
+    startRunningIndicator(action, meta, btn);
+    logToConsole(`⚡ [ОТПРАВКА]: ${meta.cmd}\n⏳ Отправка в активный диалог Antigravity...`);
 
     try {
       const convId = getActiveConversationId();
@@ -251,30 +228,25 @@ async function handleAction(action, immediate = true, btnElement = null) {
 
       const data = await res.json();
       if (data.ok) {
-        logToConsole(`✅ Сообщение "${meta.cmd}" принято чатом! Ожидание ответа модели...`);
+        logToConsole(`✅ Команда ${meta.cmd} доставлена в чат!`);
         showToast(`⚡ Выполняется: ${meta.label}`);
-        monitorExecution(action, meta, btn);
+        monitorExecution(action, meta);
       } else {
-        if (data.busy) {
-          logToConsole(`⚠️ [ЗАНЯТО]: ${data.error}`, true);
-          showToast(`⚠️ Агент занят. Дождитесь завершения!`, true);
-        } else {
-          logToConsole(`❌ [ОШИБКА СЕРВЕРА]: ${data.error}`, true);
-          showToast(`❌ Ошибка отправки команды`, true);
-        }
+        logToConsole(`❌ [ОШИБКА ОТПРАВКИ]: ${data.error}`, true);
+        showToast(`❌ Ошибка отправки`, true);
         stopRunningIndicator("error", data.error || "Ошибка отправки");
       }
     } catch (err) {
       logToConsole(`❌ [ОШИБКА]: ${err.message}. Копируем команду в буфер...`, true);
       stopRunningIndicator("error", "Сбой соединения");
-      await copyToClipboard(meta.clipboardCmd);
+      await copyToClipboard(meta.cmd);
       showToast("Скопировано в буфер (нажмите Ctrl+V)", true);
     }
   } else {
     // 📥 Заполнить окно ввода (без Enter)
-    logToConsole(`📥 [ПОДГОТОВЛЕНО ДЛЯ ЧАТА]: "${meta.clipboardCmd}"\n📋 Скопировано в буфер. Вставьте в поле чата Antigravity через Ctrl+V.`);
-    await copyToClipboard(meta.clipboardCmd);
-    showToast(`📋 Скопировано: ${meta.clipboardCmd}. Нажмите Ctrl+V в чате!`);
+    logToConsole(`📥 [ПОДГОТОВЛЕНО]: "${meta.cmd}"\n📋 Скопировано в буфер. Вставьте в поле чата Antigravity через Ctrl+V.`);
+    await copyToClipboard(meta.cmd);
+    showToast(`📋 Скопировано: ${meta.cmd}. Нажмите Ctrl+V в чате!`);
   }
 }
 

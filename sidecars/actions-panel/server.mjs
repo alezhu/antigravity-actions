@@ -123,12 +123,6 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
     return { ok: false, error: "Не найден активный диалог Antigravity" };
   }
 
-  // Pre-check: If an agent execution is already actively running, do not interrupt it!
-  const statusCheck = await getTrajectoryStatus(targetConvId);
-  if (statusCheck.ok && statusCheck.isRunning) {
-    return { ok: false, busy: true, error: "Агент уже выполняет задачу в чате. Пожалуйста, дождитесь завершения!" };
-  }
-
   const title = displayTitle || `⚡ ${message.split("\n")[0].slice(0, 60)}`;
 
   // 1. Try SendUserCascadeMessage first: this inserts a real User Message bubble in chat

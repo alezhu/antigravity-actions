@@ -1,0 +1,30 @@
+{
+  "name": "antigravity-actions",
+  "displayName": "Antigravity Actions",
+  "version": "1.0.0",
+  "description": "One-click developer actions and skills: Commit, Code Review, Run Tests, Deploy, Release.",
+  "logo": "assets/logo.svg",
+  "author": {
+    "name": "Alexandr Zhuravlev",
+    "email": "alexandr.zhuravlev@gmail.com"
+  },
+  "repository": "https://github.com/alezhu/antigravity-actions",
+  "license": "MIT",
+  "keywords": [
+    "actions",
+    "git",
+    "commit",
+    "code-review",
+    "test",
+    "deploy",
+    "release",
+    "ci-cd"
+  ],
+  "suggestedPrompts": [
+    "Commit staged and modified changes with a Conventional Commit message",
+    "Perform a deep Code Review of current diff and unstaged changes",
+    "Run project test suite and analyze test failures",
+    "Execute safe deployment pipeline with pre-flight checks",
+    "Prepare project release: calculate SemVer bump, update changelog and create git tag"
+  ]
+}

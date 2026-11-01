@@ -1,0 +1,101 @@
+# Antigravity Actions ⚡
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Antigravity](https://img.shields.io/badge/Antigravity-Plugin-purple.svg)](https://antigravity.google)
+
+English | [Русский](README.ru.md)
+
+A productivity plugin for Google Antigravity that adds one-click developer workflows: **Commit**, **Code Review**, **Run Tests**, **Deploy**, and **Release**.
+
+---
+
+## Features
+
+### 1. Interactive Auxiliary Pane (UI Sidecar)
+* **Real-time Workspace Status**: Displays active Git branch, staged/modified file counts, and the last commit.
+* **One-Click Actions**: Trigger actions directly or copy ready-to-use AI prompts into chat with a single click.
+* **Integrated Console**: View command outputs and status logs directly in the side pane.
+* **Native Theme Matching**: Adapts seamlessly to light and dark Antigravity themes.
+
+### 2. Built-in Skills & Slash Commands
+* `/commit` — Inspects `git diff`, creates a descriptive Conventional Commit message, and commits.
+* `/code-review` — Performs an in-depth review of uncommitted changes (logic errors, security vulnerabilities, edge cases, and code style).
+* `/run-tests` — Automatically detects the project test runner, executes tests, and diagnoses failures.
+* `/deploy` — Runs pre-flight checks (clean workspace, passing tests, successful build) before deployment.
+* `/release` — Determines the next SemVer version, updates changelog, and creates an annotated Git tag.
+
+### 3. Suggested Prompt Chips
+* Instant quick-action chips displayed in the Antigravity chat canvas.
+
+---
+
+## Installation
+
+### Global Installation (User-wide)
+Clone the repository directly into your Antigravity plugins directory:
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/alezhu/antigravity-actions.git "$env:USERPROFILE\.gemini\config\plugins\antigravity-actions"
+```
+
+**macOS / Linux:**
+```bash
+git clone https://github.com/alezhu/antigravity-actions.git ~/.gemini/config/plugins/antigravity-actions
+```
+
+### Project-Scoped Installation (Workspace)
+To enable the plugin only within a specific project repository, clone or copy it into the project's `.agents/plugins/` directory:
+
+```bash
+git clone https://github.com/alezhu/antigravity-actions.git .agents/plugins/antigravity-actions
+```
+
+> **Note:** After installation, restart Antigravity or open a new conversation to load the new skills and UI panel.
+
+---
+
+## Usage
+
+1. **Open the Actions Panel**: Click the Actions Panel icon in the top-right corner of the Auxiliary Pane, or trigger it via the chat link:
+   ```markdown
+   [⚡ Actions Panel](sidecar://antigravity-actions/actions-panel)
+   ```
+2. **Use Slash Commands**: In the chat input, type `/` and choose from `/commit`, `/code-review`, `/run-tests`, `/deploy`, or `/release`.
+3. **Use Prompt Chips**: Click on any of the suggested prompt chips appearing above or within the conversation.
+
+---
+
+## Project Structure
+
+```text
+antigravity-actions/
+├── plugin.json                 # Plugin manifest and metadata
+├── package.json                # Node.js package description
+├── LICENSE                     # MIT License
+├── CHANGELOG.md                # Release history and updates
+├── README.md                   # Documentation (English)
+├── README.ru.md                # Documentation (Russian)
+├── assets/
+│   └── logo.svg                # Plugin icon
+├── skills/                     # Antigravity Skills
+│   ├── commit/SKILL.md
+│   ├── code-review/SKILL.md
+│   ├── run-tests/SKILL.md
+│   ├── deploy/SKILL.md
+│   └── release/SKILL.md
+└── sidecars/
+    └── actions-panel/          # Sidecar Web UI
+        ├── sidecar.json        # Sidecar declaration
+        ├── server.mjs          # Standalone Node.js server
+        └── public/             # Web dashboard assets
+            ├── index.html
+            ├── style.css
+            └── app.js
+```
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Actions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="title-wrap">
+        <span class="icon">⚡</span>
+        <h1>Antigravity Actions</h1>
+      </div>
+      <button id="refreshBtn" class="btn-icon" title="Обновить статус">🔄</button>
+    </header>
+
+    <!-- Git Status Badge -->
+    <div id="statusCard" class="card status-card">
+      <div class="status-row">
+        <span class="label">Ветка:</span>
+        <span id="gitBranch" class="badge">Загрузка...</span>
+      </div>
+      <div class="status-row">
+        <span class="label">Изменения:</span>
+        <span id="gitChanges" class="badge badge-accent">...</span>
+      </div>
+      <div class="status-row">
+        <span class="label">Последний коммит:</span>
+        <span id="gitLastCommit" class="commit-text">...</span>
+      </div>
+    </div>
+
+    <!-- Actions List -->
+    <section class="actions-section">
+      <h2 class="section-title">Быстрые действия</h2>
+
+      <!-- Commit Action -->
+      <div class="action-card">
+        <div class="action-header">
+          <span class="action-icon">📝</span>
+          <div class="action-info">
+            <span class="action-name">Commit</span>
+            <span class="action-desc">Conventional commit по git diff</span>
+          </div>
+        </div>
+        <div class="action-inputs">
+          <input type="text" id="commitMsgInput" placeholder="Сообщение (или оставьте пустым для AI)" />
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="triggerAction('commit')">
+            Сделать коммит
+          </button>
+          <button class="btn btn-secondary" onclick="copyPrompt('commit')" title="Скопировать промпт для чата агента">
+            📋 В чат
+          </button>
+        </div>
+      </div>
+
+      <!-- Code Review Action -->
+      <div class="action-card">
+        <div class="action-header">
+          <span class="action-icon">🔍</span>
+          <div class="action-info">
+            <span class="action-name">Code Review</span>
+            <span class="action-desc">Анализ багов, безопасности и логики</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="triggerAction('codereview')">
+            Проверить Diff
+          </button>
+          <button class="btn btn-secondary" onclick="copyPrompt('codereview')" title="Скопировать промпт для чата агента">
+            📋 В чат
+          </button>
+        </div>
+      </div>
+
+      <!-- Run Tests Action -->
+      <div class="action-card">
+        <div class="action-header">
+          <span class="action-icon">🧪</span>
+          <div class="action-info">
+            <span class="action-name">Run Tests</span>
+            <span class="action-desc">Запуск тестов и поиск ошибок</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="triggerAction('test')">
+            Запустить тесты
+          </button>
+          <button class="btn btn-secondary" onclick="copyPrompt('test')" title="Скопировать промпт для чата агента">
+            📋 В чат
+          </button>
+        </div>
+      </div>
+
+      <!-- Deploy Action -->
+      <div class="action-card">
+        <div class="action-header">
+          <span class="action-icon">🚀</span>
+          <div class="action-info">
+            <span class="action-name">Deploy</span>
+            <span class="action-desc">Сборка и безопасный деплой</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="triggerAction('deploy')">
+            Выполнить деплой
+          </button>
+          <button class="btn btn-secondary" onclick="copyPrompt('deploy')" title="Скопировать промпт для чата агента">
+            📋 В чат
+          </button>
+        </div>
+      </div>
+
+      <!-- Release Action -->
+      <div class="action-card">
+        <div class="action-header">
+          <span class="action-icon">🏷️</span>
+          <div class="action-info">
+            <span class="action-name">Release</span>
+            <span class="action-desc">SemVer бамп, Changelog и Git Tag</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="triggerAction('release')">
+            Проверить релиз
+          </button>
+          <button class="btn btn-secondary" onclick="copyPrompt('release')" title="Скопировать промпт для чата агента">
+            📋 В чат
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Console Output -->
+    <section class="console-section">
+      <div class="console-header">
+        <span>Лог выполнения</span>
+        <button class="btn-small" onclick="clearConsole()">Очистить</button>
+      </div>
+      <pre id="consoleOutput" class="console-output">Готов к работе. Выберите действие выше.</pre>
+    </section>
+
+    <div id="toast" class="toast">Скопировано в буфер!</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

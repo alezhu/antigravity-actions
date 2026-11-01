@@ -1,0 +1,29 @@
+{
+  "name": "antigravity-actions",
+  "version": "1.0.0",
+  "description": "Antigravity plugin with one-click actions: Commit, Code Review, Run Tests, Deploy, Release",
+  "type": "module",
+  "main": "sidecars/actions-panel/server.mjs",
+  "scripts": {
+    "start": "node sidecars/actions-panel/server.mjs",
+    "test": "node --check sidecars/actions-panel/server.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alezhu/antigravity-actions.git"
+  },
+  "keywords": [
+    "antigravity",
+    "plugin",
+    "actions",
+    "git",
+    "code-review",
+    "ci-cd"
+  ],
+  "author": "Alexandr Zhuravlev <alexandr.zhuravlev@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alezhu/antigravity-actions/issues"
+  },
+  "homepage": "https://github.com/alezhu/antigravity-actions#readme"
+}

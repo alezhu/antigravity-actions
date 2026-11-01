@@ -110,6 +110,23 @@ async function getTrajectoryStatus(conversationId) {
   }
 }
 
+let cachedDefaultModel = "MODEL_PLACEHOLDER_M318";
+async function getDefaultModel(lsAddr, csrf) {
+  try {
+    const res = await fetch(`http://${lsAddr}/exa.language_server_pb.LanguageServerService/GetCascadeModelConfigData`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-codeium-csrf-token": csrf },
+      body: "{}"
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const m = data.defaultOverrideModelConfig?.modelOrAlias?.model || data.clientModelConfigs?.[0]?.modelOrAlias?.model;
+      if (m) cachedDefaultModel = m;
+    }
+  } catch {}
+  return cachedDefaultModel;
+}
+
 // Send message directly to Antigravity chat via LanguageServerService
 async function sendToChatRPC(message, conversationId, displayTitle) {
   const lsAddr = process.env.ANTIGRAVITY_LS_ADDRESS;
@@ -124,6 +141,7 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
   }
 
   const title = displayTitle || `⚡ ${message.split("\n")[0].slice(0, 60)}`;
+  const model = await getDefaultModel(lsAddr, csrf);
 
   // 1. Try SendUserCascadeMessage first: this inserts a real User Message bubble in chat
   try {
@@ -135,7 +153,12 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
       },
       body: JSON.stringify({
         cascadeId: targetConvId,
-        items: [{ text: message }]
+        items: [{ text: message }],
+        cascadeConfig: {
+          plannerConfig: {
+            planModel: model
+          }
+        }
       })
     });
 

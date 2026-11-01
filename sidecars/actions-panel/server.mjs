@@ -483,6 +483,29 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  // Plugin metadata endpoint
+  if (url.pathname === "/api/info" && req.method === "GET") {
+    try {
+      const pluginJsonPath = join(__dirname, "..", "..", "plugin.json");
+      if (existsSync(pluginJsonPath)) {
+        const content = await readFileAsync(pluginJsonPath, "utf-8");
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(content);
+        return;
+      }
+    } catch (e) {
+      console.warn("Failed to read plugin.json:", e);
+    }
+    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({
+      version: "1.1.0",
+      name: "antigravity-actions",
+      displayName: "Antigravity Actions",
+      repository: "https://github.com/alezhu/antigravity-actions"
+    }));
+    return;
+  }
+
   // Status check endpoint
   if (url.pathname === "/api/status" && (req.method === "GET" || req.method === "POST")) {
     const convId = url.searchParams.get("conversationId") || null;
@@ -519,6 +542,22 @@ const server = createServer(async (req, res) => {
       }
     });
     return;
+  }
+
+  // Assets fallback
+  if (url.pathname.startsWith("/assets/")) {
+    const rel = url.pathname.replace(/^\/assets\//, "");
+    const assetPath = join(__dirname, "..", "..", "assets", rel);
+    if (existsSync(assetPath)) {
+      const ext = extname(assetPath);
+      const contentType = MIME_TYPES[ext] || "application/octet-stream";
+      try {
+        const content = await readFileAsync(assetPath);
+        res.writeHead(200, { "Content-Type": contentType });
+        res.end(content);
+        return;
+      } catch {}
+    }
   }
 
   // Preload.js bridge for sidecars

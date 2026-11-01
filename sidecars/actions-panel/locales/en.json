@@ -2,6 +2,31 @@
   "code": "en",
   "name": "English",
   "langHint": "",
+  "tabs": {
+    "commands": "Commands",
+    "log": "Log",
+    "settings": "Settings",
+    "about": "About"
+  },
+  "settings": {
+    "languageTitle": "Interface Language",
+    "languageDesc": "Sidecar interface and prompt language",
+    "commandsVisibilityTitle": "Commands Visibility",
+    "commandsVisibilityDesc": "Enable or disable commands displayed in the Commands tab",
+    "showAllCommands": "Show all",
+    "hideAllCommands": "Hide all"
+  },
+  "about": {
+    "title": "Antigravity Actions",
+    "description": "One-click developer actions and skills for Antigravity.",
+    "version": "Version",
+    "author": "Author",
+    "repository": "Repository",
+    "license": "License",
+    "helpTitle": "Usage Guide",
+    "helpSubtitle": "How to use actions and features",
+    "helpContent": "<p>All actions can be sent directly to Antigravity chat:</p><ul><li><b>⚡ Execute</b> — Immediately sends the command to active Antigravity chat and tracks execution.</li><li><b>📋 Copy</b> — Copies the full AI prompt to your clipboard (paste into chat via Ctrl+V).</li><li><b>Drag to reorder</b> — Drag cards by the handle (⠿) to organize your workflow.</li><li><b>Hide commands</b> — Click (✕) to hide any command card; re-enable anytime in the Settings tab.</li></ul>"
+  },
   "ui": {
     "title": "Antigravity Actions",
     "connectionStatus": "● Connected",
@@ -15,6 +40,10 @@
     "btnCopy": "📋 Copy",
     "btnExecuteTitle": "Execute command immediately in chat",
     "btnCopyTitle": "Copy AI prompt to clipboard (paste with Ctrl+V in chat)",
+    "btnHideActionTitle": "Hide command (can be re-enabled in Settings)",
+    "actionHiddenToast": "Command hidden. Re-enable in Settings.",
+    "noVisibleCommands": "All commands are hidden. Enable them in Settings.",
+    "openSettings": "Open Settings",
     "historyTitle": "Activity Log",
     "btnClear": "Clear",
     "readyStatus": "Ready to send commands to Antigravity chat.",
@@ -27,10 +56,7 @@
     "toastPromptCopied": "📋 Prompt copied to clipboard! Press Ctrl+V in chat.",
     "sendError": "Failed to send message",
     "connError": "Connection error. Copied prompt to clipboard (press Ctrl+V).",
-    "dragHandleTitle": "Drag to reorder",
-    "btnResetOrder": "↺",
-    "btnResetOrderTitle": "Reset actions order to default",
-    "orderResetToast": "Actions order reset to default"
+    "dragHandleTitle": "Drag to reorder"
   },
   "actions": {
     "test": {

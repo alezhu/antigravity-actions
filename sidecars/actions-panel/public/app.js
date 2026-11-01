@@ -7,11 +7,18 @@ const activeBadgeEl = document.getElementById("activeCommandBadge");
 const activeTitleEl = document.getElementById("activeCommandTitle");
 const activeTimerEl = document.getElementById("activeCommandTimer");
 const langSelectEl = document.getElementById("langSelect");
+const logDotEl = document.getElementById("logDot");
+const emptyCommandsStateEl = document.getElementById("emptyCommandsState");
 
 let activeTimerInterval = null;
 let activePollInterval = null;
 let activeStartTime = 0;
 let currentRunningAction = null;
+let currentTab = "commands";
+
+// Supported actions
+const ALL_ACTIONS = ["test", "codereview", "commit", "push", "release"];
+let hiddenActions = new Set();
 
 // i18n state
 let availableLocales = [];
@@ -166,20 +173,140 @@ async function initI18n() {
   }
 }
 
+// Tab Switching
+function switchTab(tabName) {
+  if (!["commands", "log", "settings", "about"].includes(tabName)) return;
+  currentTab = tabName;
+
+  document.body.classList.toggle("view-log", tabName === "log");
+
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    const isActive = btn.getAttribute("data-tab") === tabName;
+    btn.classList.toggle("active", isActive);
+    btn.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+
+  document.querySelectorAll(".tab-pane").forEach(pane => {
+    pane.classList.toggle("active", pane.id === `tab-${tabName}`);
+  });
+
+  if (tabName === "log" && logDotEl) {
+    logDotEl.classList.add("hidden");
+  }
+}
+
+// Fetch plugin metadata (version, etc.)
+async function loadPluginInfo() {
+  try {
+    const res = await fetch("/api/info");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.version) {
+        const verEl = document.getElementById("aboutVersion");
+        if (verEl) verEl.textContent = `v${data.version}`;
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load plugin info:", err);
+  }
+}
+
+// Command Visibility Management
+function loadActionVisibility() {
+  try {
+    const saved = localStorage.getItem("antigravity_actions_hidden");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        hiddenActions = new Set(parsed.filter(id => ALL_ACTIONS.includes(id)));
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load action visibility:", err);
+  }
+  applyActionVisibility();
+}
+
+function saveActionVisibility() {
+  try {
+    localStorage.setItem("antigravity_actions_hidden", JSON.stringify(Array.from(hiddenActions)));
+  } catch (err) {
+    console.warn("Failed to save action visibility:", err);
+  }
+}
+
+function applyActionVisibility() {
+  ALL_ACTIONS.forEach(action => {
+    const isHidden = hiddenActions.has(action);
+    const card = document.getElementById(`card-${action}`);
+    if (card) {
+      card.classList.toggle("hidden-action", isHidden);
+    }
+    const toggle = document.getElementById(`toggle-vis-${action}`);
+    if (toggle) {
+      toggle.checked = !isHidden;
+    }
+  });
+
+  checkEmptyCommandsState();
+}
+
+function checkEmptyCommandsState() {
+  if (!emptyCommandsStateEl) return;
+  const allHidden = ALL_ACTIONS.every(act => hiddenActions.has(act));
+  emptyCommandsStateEl.classList.toggle("hidden", !allHidden);
+}
+
+function hideAction(action) {
+  hiddenActions.add(action);
+  saveActionVisibility();
+  applyActionVisibility();
+  showToast(t("ui.actionHiddenToast"));
+}
+
+function setActionVisibility(action, isVisible) {
+  if (isVisible) {
+    hiddenActions.delete(action);
+  } else {
+    hiddenActions.add(action);
+  }
+  saveActionVisibility();
+  applyActionVisibility();
+}
+
+function toggleAllCommands(show) {
+  if (show) {
+    hiddenActions.clear();
+  } else {
+    ALL_ACTIONS.forEach(act => hiddenActions.add(act));
+  }
+  saveActionVisibility();
+  applyActionVisibility();
+}
+
 // Logging to the embedded activity console
 function logToConsole(text, isError = false) {
   const time = new Date().toLocaleTimeString();
   const prefix = isError ? "❌ " : "👉 ";
-  consoleEl.textContent = `[${time}] ${prefix}${text}\n\n` + consoleEl.textContent;
+  if (consoleEl) {
+    consoleEl.textContent = `[${time}] ${prefix}${text}\n\n` + consoleEl.textContent;
+  }
+
+  if (currentTab !== "log" && logDotEl) {
+    logDotEl.classList.remove("hidden");
+  }
 }
 
 // Clear activity console
 function clearConsole() {
-  consoleEl.textContent = t("ui.consoleCleared");
+  if (consoleEl) {
+    consoleEl.textContent = t("ui.consoleCleared");
+  }
 }
 
 // Display transient toast notifications
 function showToast(message = "Done!", isError = false) {
+  if (!toastEl) return;
   toastEl.textContent = message;
   toastEl.style.backgroundColor = isError ? "#ef4444" : "#10b981";
   toastEl.classList.add("show");
@@ -358,7 +485,6 @@ function stopRunningIndicator(state = "success", message = "") {
 
 // Poll Language Server for completion / status of executing trajectory
 function monitorExecution(action, meta, targetConvId = null) {
-  // Always stop and clear any existing polling interval before starting a new one
   if (activePollInterval) {
     clearInterval(activePollInterval);
     activePollInterval = null;
@@ -391,7 +517,6 @@ function monitorExecution(action, meta, targetConvId = null) {
         initialStepCount = data.stepCount;
       }
 
-      // Self-cleanup helper ensuring interval is immediately destroyed
       const stopSelf = () => {
         isStopped = true;
         clearInterval(pollIntervalId);
@@ -400,7 +525,7 @@ function monitorExecution(action, meta, targetConvId = null) {
         }
       };
 
-      // 1. Detect cancellation (Language server stopped due to user cancellation)
+      // 1. Detect cancellation
       if (data.isCanceled) {
         stopSelf();
         try {
@@ -474,9 +599,7 @@ async function copyToClipboard(text) {
   }
 }
 
-// Main handler for action button modes:
-// 1. "execute": Runs command immediately in chat
-// 2. "copy":    Copies full AI prompt to clipboard for Ctrl+V
+// Main handler for action button modes
 async function handleAction(action, mode = "execute", btnElement = null) {
   const meta = getActionMeta(action);
   if (!meta.cmd) return;
@@ -485,13 +608,11 @@ async function handleAction(action, mode = "execute", btnElement = null) {
 
   switch (mode) {
     case "execute": {
-      // Guard against concurrent execution
       if (currentRunningAction) {
         showToast(t("ui.alreadyRunning"), true);
         return;
       }
 
-      // ⚡ Execute directly in chat (Enter)
       startRunningIndicator(action, meta, btn);
       logToConsole(`⚡ [EXECUTE]: ${meta.cmd}\n⏳ Dispatching to active Antigravity chat...`);
 
@@ -517,7 +638,6 @@ async function handleAction(action, mode = "execute", btnElement = null) {
 
         const data = await res.json();
         if (data.ok) {
-          // If a new conversation was created, focus/switch to it in Antigravity
           if (data.isNewConversation && data.recipient) {
             try {
               if (window.sidecar?.ui?.toggleConversation) {
@@ -550,7 +670,6 @@ async function handleAction(action, mode = "execute", btnElement = null) {
     }
 
     case "copy": {
-      // 📋 Copy: copy AI prompt to clipboard and shift focus to parent window
       await copyToClipboard(meta.prompt);
       try {
         window.parent?.focus();
@@ -610,24 +729,8 @@ function restoreCardOrder() {
   });
 }
 
-function resetCardOrder() {
-  try {
-    localStorage.removeItem("antigravity_actions_order");
-  } catch {}
-  const container = getActionsContainer();
-  if (container) {
-    DEFAULT_ACTION_ORDER.forEach(act => {
-      const card = document.getElementById(`card-${act}`);
-      if (card && container.contains(card)) {
-        container.appendChild(card);
-      }
-    });
-  }
-  showToast(t("ui.orderResetToast"));
-}
-
 function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll(".action-card:not(.dragging)")];
+  const draggableElements = [...container.querySelectorAll(".action-card:not(.dragging):not(.hidden-action)")];
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
@@ -650,7 +753,6 @@ function initDragAndDrop() {
     card.setAttribute("draggable", "true");
 
     card.addEventListener("dragstart", (e) => {
-      // Prevent drag initiation when clicking on interactive controls (inputs, buttons, links)
       if (e.target.closest("input, button, select, textarea, a")) {
         e.preventDefault();
         return;
@@ -689,11 +791,20 @@ function initDragAndDrop() {
 // Expose handlers globally for HTML attributes
 window.handleAction = handleAction;
 window.clearConsole = clearConsole;
-window.resetCardOrder = resetCardOrder;
+window.switchTab = switchTab;
+window.hideAction = hideAction;
+window.setActionVisibility = setActionVisibility;
+window.toggleAllCommands = toggleAllCommands;
 
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
+  try {
+    localStorage.removeItem("antigravity_actions_active_tab");
+  } catch {}
   restoreCardOrder();
+  loadActionVisibility();
+  switchTab("commands");
   initDragAndDrop();
   initI18n();
+  loadPluginInfo();
 });

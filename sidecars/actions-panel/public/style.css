@@ -106,6 +106,26 @@ h1 {
   animation: none;
 }
 
+.active-command-card.error {
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.15);
+  animation: none;
+}
+
+.active-command-card.error .active-command-pulse {
+  background-color: var(--danger);
+  box-shadow: 0 0 10px var(--danger);
+  animation: none;
+}
+
+.active-command-card.error .active-command-badge {
+  color: #f87171;
+}
+
+.active-command-card.error .active-command-timer {
+  color: #fca5a5;
+}
+
 .active-command-pulse {
   width: 10px;
   height: 10px;

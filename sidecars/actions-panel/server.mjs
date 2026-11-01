@@ -90,12 +90,18 @@ async function getTrajectoryStatus(conversationId) {
 
     const status = summary.status || "CASCADE_RUN_STATUS_UNSPECIFIED";
     const isRunning = status === "CASCADE_RUN_STATUS_RUNNING" || status === "CASCADE_RUN_STATUS_BUSY";
+    const terminationReason = summary.latestExecutorTerminationReason || "";
+    const isError = terminationReason === "EXECUTOR_TERMINATION_REASON_ERROR";
+    const isCanceled = terminationReason === "EXECUTOR_TERMINATION_REASON_USER_CANCELED";
 
     return {
       ok: true,
       conversationId: targetConvId,
       status,
       isRunning,
+      terminationReason,
+      isError,
+      isCanceled,
       stepCount: summary.stepCount || 0,
       title: summary.annotations?.title || summary.summary || ""
     };
@@ -115,6 +121,12 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
   const targetConvId = conversationId || await getLatestConversationId() || process.env.ANTIGRAVITY_CONVERSATION_ID;
   if (!targetConvId) {
     return { ok: false, error: "Не найден активный диалог Antigravity" };
+  }
+
+  // Pre-check: If an agent execution is already actively running, do not interrupt it!
+  const statusCheck = await getTrajectoryStatus(targetConvId);
+  if (statusCheck.ok && statusCheck.isRunning) {
+    return { ok: false, busy: true, error: "Агент уже выполняет задачу в чате. Пожалуйста, дождитесь завершения!" };
   }
 
   const title = displayTitle || `⚡ ${message.split("\n")[0].slice(0, 60)}`;

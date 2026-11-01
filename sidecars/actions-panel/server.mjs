@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile, readdir, stat, existsSync } from "node:fs";
+import { readFile, readdir, stat, existsSync, watch } from "node:fs";
 import { promisify } from "node:util";
 import { join, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,6 +23,37 @@ const MIME_TYPES = {
 
 const readFileAsync = promisify(readFile);
 const readdirAsync = promisify(readdir);
+
+// Live reload file watchers
+const reloadClients = new Set();
+let reloadDebounceTimer = null;
+
+function notifyReloadClients() {
+  if (reloadDebounceTimer) clearTimeout(reloadDebounceTimer);
+  reloadDebounceTimer = setTimeout(() => {
+    for (const client of reloadClients) {
+      try {
+        client.write("data: reload\n\n");
+      } catch {}
+    }
+  }, 150);
+}
+
+try {
+  if (existsSync(PUBLIC_DIR)) {
+    watch(PUBLIC_DIR, { recursive: true }, () => notifyReloadClients());
+  }
+} catch (e) {
+  console.warn("Failed to watch PUBLIC_DIR:", e);
+}
+
+try {
+  if (existsSync(LOCALES_DIR)) {
+    watch(LOCALES_DIR, { recursive: true }, () => notifyReloadClients());
+  }
+} catch (e) {
+  console.warn("Failed to watch LOCALES_DIR:", e);
+}
 
 // Helper to query Language Server for currently active conversation ID
 async function getLatestConversationId() {
@@ -506,6 +537,21 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  // Live reload SSE endpoint
+  if (url.pathname === "/api/live-reload" && req.method === "GET") {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "Connection": "keep-alive"
+    });
+    res.write("retry: 1000\n\n");
+    reloadClients.add(res);
+    req.on("close", () => {
+      reloadClients.delete(res);
+    });
+    return;
+  }
+
   // Status check endpoint
   if (url.pathname === "/api/status" && (req.method === "GET" || req.method === "POST")) {
     const convId = url.searchParams.get("conversationId") || null;
@@ -583,7 +629,12 @@ const server = createServer(async (req, res) => {
     const ext = extname(filePath);
     const contentType = MIME_TYPES[ext] || "application/octet-stream";
     const content = await readFileAsync(filePath);
-    res.writeHead(200, { "Content-Type": contentType });
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    });
     res.end(content);
   } catch (err) {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });

@@ -788,6 +788,20 @@ function initDragAndDrop() {
   });
 }
 
+// Live reload SSE listener
+function initLiveReload() {
+  try {
+    const es = new EventSource("/api/live-reload");
+    es.onmessage = (event) => {
+      if (event.data === "reload") {
+        window.location.reload();
+      }
+    };
+  } catch (err) {
+    console.warn("Live reload unavailable:", err);
+  }
+}
+
 // Expose handlers globally for HTML attributes
 window.handleAction = handleAction;
 window.clearConsole = clearConsole;
@@ -795,6 +809,7 @@ window.switchTab = switchTab;
 window.hideAction = hideAction;
 window.setActionVisibility = setActionVisibility;
 window.toggleAllCommands = toggleAllCommands;
+window.reloadPanel = () => window.location.reload();
 
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
@@ -807,4 +822,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initDragAndDrop();
   initI18n();
   loadPluginInfo();
+  initLiveReload();
 });

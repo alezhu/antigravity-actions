@@ -22,7 +22,11 @@ let currentLocale = "en";
 // Retrieve the currently active Antigravity conversation ID
 function getActiveConversationId() {
   const params = new URLSearchParams(window.location.search);
-  return window.sidecar?.conversationId || params.get("conversationId") || null;
+  const rawId = window.sidecar?.conversationId || params.get("conversationId") || null;
+  if (!rawId || rawId === "_new" || rawId === "new" || rawId === "null" || rawId === "undefined") {
+    return null;
+  }
+  return rawId;
 }
 
 // Safely resolve nested translation keys with fallback to English
@@ -221,6 +225,12 @@ function getActionMeta(action) {
     cmd = template.replace("{command}", baseCmd);
   }
 
+  // Ensure language hint is included when active locale specifies it
+  const langHint = actionConfig.langHint || currentTranslations.langHint || (currentLocale === "ru" ? "отвечай на русском языке" : "");
+  if (langHint && !cmd.toLowerCase().includes(langHint.toLowerCase())) {
+    cmd = `${cmd} (${langHint})`;
+  }
+
   // Build natural language prompt
   let prompt = "";
   if (input) {
@@ -316,7 +326,7 @@ function stopRunningIndicator(state = "success", message = "") {
 }
 
 // Poll Language Server for completion / status of executing trajectory
-function monitorExecution(action, meta) {
+function monitorExecution(action, meta, targetConvId = null) {
   let sawRunningState = false;
   let checkCount = 0;
   let initialStepCount = null;
@@ -324,7 +334,7 @@ function monitorExecution(action, meta) {
   activePollInterval = setInterval(async () => {
     checkCount++;
     try {
-      const convId = getActiveConversationId() || "";
+      const convId = targetConvId || getActiveConversationId() || "";
       const res = await fetch(`/api/status?conversationId=${encodeURIComponent(convId)}`);
       if (!res.ok) return;
       const data = await res.json();
@@ -403,21 +413,44 @@ async function handleAction(action, mode = "execute", btnElement = null) {
 
       try {
         const convId = getActiveConversationId();
+        let workspaceUris = [];
+        if (window.sidecar?.getWorkspaceUris) {
+          try {
+            workspaceUris = await window.sidecar.getWorkspaceUris();
+          } catch {}
+        }
+
         const res = await fetch("/api/send-chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: meta.cmd,
             displayTitle: meta.title,
-            conversationId: convId
+            conversationId: convId,
+            workspaceUris: workspaceUris
           })
         });
 
         const data = await res.json();
         if (data.ok) {
+          // If a new conversation was created, focus/switch to it in Antigravity
+          if (data.isNewConversation && data.recipient) {
+            try {
+              if (window.sidecar?.ui?.toggleConversation) {
+                window.sidecar.ui.toggleConversation(data.recipient);
+              } else {
+                window.parent?.postMessage({
+                  type: 'toggle-conversation',
+                  payload: { conversationId: data.recipient }
+                }, '*');
+              }
+            } catch (err) {
+              console.warn("Failed to toggle conversation:", err);
+            }
+          }
           logToConsole(`✅ Command ${meta.cmd} delivered to chat!`);
           showToast(t("ui.executingToast", { label: meta.label }));
-          monitorExecution(action, meta);
+          monitorExecution(action, meta, data.recipient);
         } else {
           logToConsole(`❌ [SEND ERROR]: ${data.error}`, true);
           showToast(t("ui.sendError"), true);

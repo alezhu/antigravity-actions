@@ -1,6 +1,7 @@
 {
   "code": "en",
   "name": "English",
+  "langHint": "",
   "ui": {
     "title": "Antigravity Actions",
     "connectionStatus": "● Connected",

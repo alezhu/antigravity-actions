@@ -68,7 +68,27 @@ async function getTrajectoryStatus(conversationId) {
     return { ok: false, error: "Antigravity Language Server unavailable" };
   }
 
-  const targetConvId = conversationId || await getLatestConversationId() || process.env.ANTIGRAVITY_CONVERSATION_ID;
+  const isInvalid = !conversationId ||
+    conversationId === "_new" ||
+    conversationId === "new" ||
+    conversationId === "null" ||
+    conversationId === "undefined";
+
+  if (isInvalid) {
+    return {
+      ok: true,
+      conversationId: null,
+      status: "CASCADE_RUN_STATUS_IDLE",
+      isRunning: false,
+      terminationReason: "",
+      isError: false,
+      isCanceled: false,
+      stepCount: 0,
+      title: ""
+    };
+  }
+
+  const targetConvId = conversationId;
   if (!targetConvId) {
     return { ok: false, error: "Conversation not found" };
   }
@@ -130,15 +150,199 @@ async function getDefaultModel(lsAddr, csrf) {
   return cachedDefaultModel;
 }
 
+// Helper to normalize file URIs for comparison
+function normalizeUri(uri) {
+  return (uri || "").replace(/%3A/gi, ":").toLowerCase().replace(/\/+$/, "");
+}
+
+// Resolve workspace URIs if not provided or empty
+async function resolveWorkspaceUris(providedUris, lsAddr, csrf) {
+  if (Array.isArray(providedUris) && providedUris.length > 0) {
+    return providedUris;
+  }
+  try {
+    const trajRes = await fetch(`http://${lsAddr}/exa.language_server_pb.LanguageServerService/GetAllCascadeTrajectories`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-codeium-csrf-token": csrf
+      },
+      body: "{}"
+    });
+    if (trajRes.ok) {
+      const trajData = await trajRes.json();
+      const summaries = trajData.trajectorySummaries || {};
+      const keys = Object.keys(summaries);
+      for (let i = keys.length - 1; i >= 0; i--) {
+        const meta = summaries[keys[i]]?.trajectoryMetadata;
+        if (meta?.workspaceUris && meta.workspaceUris.length > 0) {
+          return meta.workspaceUris;
+        }
+        if (meta?.workspaces && meta.workspaces.length > 0) {
+          const uris = meta.workspaces.map(w => w.workspaceFolderAbsoluteUri).filter(Boolean);
+          if (uris.length > 0) return uris;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[Antigravity Actions] resolveWorkspaceUris error:", err.message);
+  }
+  return [];
+}
+
+// Resolve active projectId for workspace URIs
+async function resolveProjectId(workspaceUris, lsAddr, csrf) {
+  const normUris = (Array.isArray(workspaceUris) ? workspaceUris : [workspaceUris])
+    .filter(Boolean)
+    .map(normalizeUri);
+
+  try {
+    const trajRes = await fetch(`http://${lsAddr}/exa.language_server_pb.LanguageServerService/GetAllCascadeTrajectories`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-codeium-csrf-token": csrf
+      },
+      body: "{}"
+    });
+    if (trajRes.ok) {
+      const trajData = await trajRes.json();
+      const summaries = trajData.trajectorySummaries || {};
+      const keys = Object.keys(summaries);
+
+      // 1. First pass: match against trajectory workspace URIs
+      for (let i = keys.length - 1; i >= 0; i--) {
+        const meta = summaries[keys[i]]?.trajectoryMetadata;
+        if (!meta || !meta.projectId || meta.projectId === "outside-of-project") continue;
+
+        const uris = [
+          ...(meta.workspaceUris || []),
+          ...(meta.workspaces || []).map(w => w.workspaceFolderAbsoluteUri)
+        ].filter(Boolean).map(normalizeUri);
+
+        for (const u of uris) {
+          if (normUris.length === 0 || normUris.some(nu => nu === u || u.startsWith(nu) || nu.startsWith(u))) {
+            return meta.projectId;
+          }
+        }
+      }
+
+      // 2. Second pass: fallback to latest trajectory with valid projectId
+      for (let i = keys.length - 1; i >= 0; i--) {
+        const meta = summaries[keys[i]]?.trajectoryMetadata;
+        if (meta?.projectId && meta.projectId !== "outside-of-project") {
+          return meta.projectId;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[Antigravity Actions] resolveProjectId (trajectories) error:", err.message);
+  }
+
+  try {
+    // 3. Fallback: check ListProjects and ReadProject
+    const listRes = await fetch(`http://${lsAddr}/exa.language_server_pb.LanguageServerService/ListProjects`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-codeium-csrf-token": csrf
+      },
+      body: "{}"
+    });
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      const projectIds = (listData.projectIds || []).filter(p => p !== "outside-of-project");
+      for (const pid of projectIds) {
+        const pRes = await fetch(`http://${lsAddr}/exa.language_server_pb.LanguageServerService/ReadProject`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-codeium-csrf-token": csrf
+          },
+          body: JSON.stringify({ id: pid })
+        });
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          const resources = pData.project?.projectResources?.resources || [];
+          for (const r of resources) {
+            const folderUri = normalizeUri(r.gitFolder?.folderUri || r.folderUri);
+            if (folderUri && normUris.some(nu => nu === folderUri || folderUri.startsWith(nu) || nu.startsWith(folderUri))) {
+              return pid;
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[Antigravity Actions] resolveProjectId (projects) error:", err.message);
+  }
+
+  return process.env.ANTIGRAVITY_PROJECT_ID || null;
+}
+
 // Send message directly to Antigravity chat via LanguageServerService
-async function sendToChatRPC(message, conversationId, displayTitle) {
+async function sendToChatRPC(message, conversationId, displayTitle, workspaceUris = []) {
   const lsAddr = process.env.ANTIGRAVITY_LS_ADDRESS;
   const csrf = process.env.ANTIGRAVITY_CSRF_TOKEN;
   if (!lsAddr || !csrf) {
     return { ok: false, error: "Antigravity Language Server unavailable (environment variables missing)" };
   }
 
-  const targetConvId = conversationId || await getLatestConversationId() || process.env.ANTIGRAVITY_CONVERSATION_ID;
+  const isExplicitNew = !conversationId ||
+    conversationId === "_new" ||
+    conversationId === "new" ||
+    conversationId === "null" ||
+    conversationId === "undefined";
+
+  let targetConvId = conversationId;
+  let isNewConversation = false;
+
+  if (isExplicitNew) {
+    // When executing in a new conversation tab, start a fresh cascade attached to the current project
+    try {
+      const targetWorkspaceUris = await resolveWorkspaceUris(workspaceUris, lsAddr, csrf);
+      const projectId = await resolveProjectId(targetWorkspaceUris, lsAddr, csrf);
+
+      const startBody = {
+        source: "CORTEX_TRAJECTORY_SOURCE_CASCADE_CLIENT"
+      };
+      if (targetWorkspaceUris.length > 0) {
+        startBody.workspaceUris = targetWorkspaceUris;
+      }
+      if (projectId) {
+        startBody.projectEnvConfig = {
+          projectId
+        };
+      }
+
+      const startRes = await fetch(`http://${lsAddr}/exa.language_server_pb.LanguageServerService/StartCascade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-codeium-csrf-token": csrf
+        },
+        body: JSON.stringify(startBody)
+      });
+      if (startRes.ok) {
+        const startData = await startRes.json();
+        if (startData.cascadeId) {
+          targetConvId = startData.cascadeId;
+          isNewConversation = true;
+          console.log(`[Antigravity Actions] Started new cascade in project ${projectId || 'standalone'}: ${targetConvId}`);
+        }
+      } else {
+        console.warn("[Antigravity Actions] StartCascade non-ok:", startRes.status, await startRes.text());
+      }
+    } catch (err) {
+      console.warn("[Antigravity Actions] StartCascade error:", err);
+    }
+  }
+
+  if (!targetConvId || targetConvId === "_new" || targetConvId === "new") {
+    // Fallback only if StartCascade failed and no valid targetConvId exists
+    targetConvId = await getLatestConversationId() || process.env.ANTIGRAVITY_CONVERSATION_ID;
+  }
+
   if (!targetConvId) {
     return { ok: false, error: "Active Antigravity conversation not found" };
   }
@@ -166,7 +370,16 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
     });
 
     if (userRes.ok) {
-      return { ok: true, recipient: targetConvId, delivered: true, method: "user_cascade", title };
+      return {
+        ok: true,
+        recipient: targetConvId,
+        isNewConversation,
+        delivered: true,
+        method: "user_cascade",
+        title
+      };
+    } else {
+      console.warn("SendUserCascadeMessage returned non-ok status:", userRes.status, await userRes.text());
     }
   } catch (err) {
     console.warn("SendUserCascadeMessage failed, falling back to SendAgentMessage:", err);
@@ -189,7 +402,14 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
     });
 
     if (agentRes.ok) {
-      return { ok: true, recipient: targetConvId, delivered: true, method: "agent_message", title };
+      return {
+        ok: true,
+        recipient: targetConvId,
+        isNewConversation,
+        delivered: true,
+        method: "agent_message",
+        title
+      };
     } else {
       const errText = await agentRes.text();
       return { ok: false, error: `RPC error: ${errText}` };
@@ -282,6 +502,7 @@ const server = createServer(async (req, res) => {
         const message = payload.message || payload.content || "";
         const convId = payload.conversationId || url.searchParams.get("conversationId");
         const displayTitle = payload.displayTitle || payload.title;
+        const workspaceUris = payload.workspaceUris || [];
 
         if (!message) {
           res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
@@ -289,7 +510,7 @@ const server = createServer(async (req, res) => {
           return;
         }
 
-        const result = await sendToChatRPC(message, convId, displayTitle);
+        const result = await sendToChatRPC(message, convId, displayTitle, workspaceUris);
         res.writeHead(result.ok ? 200 : 500, { "Content-Type": "application/json; charset=utf-8" });
         res.end(JSON.stringify(result));
       } catch (err) {

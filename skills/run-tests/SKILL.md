@@ -1,33 +1,32 @@
 ---
 name: run-tests
-description: Автоматическое определение тестового фреймворка, запуск тестов проекта, разбор упавших тестов и предложение исправлений.
+description: Automatically detects project test framework, runs test suites, diagnoses test failures, and suggests patches.
 ---
 
-# Навык: Run Tests & Diagnostic
+# Skill: Run Tests & Diagnostics
 
-При вызове этого навыка **в самую первую очередь (первой строкой ответа)** выведи:
-`### ⚡ Выполнение команды: /run-tests`
+When this skill is invoked, **first and foremost (as the very first line of your response)** output:
+`### ⚡ Executing command: /run-tests`
 
-Этот навык запускает тестовый набор проекта и помогает быстро диагностировать и устранить ошибки.
+## Instructions
 
-## Инструкция по выполнению
-
-1. **Определение тестового раннера**:
-   - Node.js / TypeScript: проверь `package.json` (`npm test`, `pnpm test`, `yarn test`, `bun test`, jest, vitest, mocha, playwright).
-   - Python: проверь наличие `pytest`, `unittest`, `manage.py test`, `tox`.
+1. **Detect Test Runner**:
+   - Node.js / TypeScript: inspect `package.json` (`npm test`, `pnpm test`, `yarn test`, `bun test`, vitest, jest, mocha, playwright).
+   - Python: detect `pytest`, `unittest`, `manage.py test`, `tox`.
    - Go: `go test ./...`.
    - Rust: `cargo test`.
    - .NET / C#: `dotnet test`.
 
-2. **Запуск тестов**:
-   - Выполни команду запуска в терминале.
-   - Если пользователь указал конкретный файл или маску, запускай только релевантные тесты.
+2. **Run Tests**:
+   - Execute the test suite in the workspace.
+   - If the user supplied a specific test path or pattern, run only the targeted tests.
 
-3. **Анализ результатов**:
-   - Если **все тесты прошли успешно**:
-     - Покажи краткую сводку (количество пройденных тестов, время выполнения).
-   - Если **есть упавшие тесты**:
-     - Выдели упавшие тесты и стектрейсы.
-     - Прочитай код упавшего теста и тестируемого модуля.
-     - Объясни первопричину падения (Root Cause).
-     - Предложи готовый патч или исправь ошибку, если пользователь дал разрешение.
+3. **Analyze Test Results**:
+   - If **all tests passed**:
+     - Provide a concise summary (number of passed tests, duration).
+   - If **any tests failed**:
+     - Highlight failing tests and their stack traces.
+     - Inspect the code of the failing test and tested module.
+     - Explain the root cause clearly.
+     - Propose a clean fix/diff or apply it if the user authorized fixes.
+   - Output analysis in English (or the user's requested language).

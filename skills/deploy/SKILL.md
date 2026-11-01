@@ -1,34 +1,34 @@
 ---
 name: deploy
-description: Безопасный деплой приложения. Проверяет чистоту репозитория, запускает линтеры/тесты, собирает артефакты и запускает сценарий развертывания.
+description: Safe project deployment. Validates repository clean state, runs linters/tests, builds artifacts, and triggers the deployment pipeline.
 ---
 
-# Навык: Safe Deploy
+# Skill: Safe Deploy
 
-При вызове этого навыка **в самую первую очередь (первой строкой ответа)** выведи:
-`### ⚡ Выполнение команды: /deploy`
+When this skill is invoked, **first and foremost (as the very first line of your response)** output:
+`### ⚡ Executing command: /deploy`
 
-Этот навык проводит контролируемый процесс развертывания проекта в целевое окружение (staging/production).
+This skill performs a controlled, verified deployment to the target environment (staging/production).
 
-## Инструкция по выполнению
+## Instructions
 
-1. **Pre-flight проверки**:
-   - Проверь текущую ветку (`git branch --show-current`). Деплой в production обычно выполняется из `main` / `master` или релизной ветки.
-   - Проверь `git status`: предупреди, если есть незакоммиченные локальные изменения.
-   - Убедись, что локальная ветка синхронизирована с удаленной (`git fetch && git status -uno`).
+1. **Pre-flight Checks**:
+   - Verify current branch (`git branch --show-current`). Production deploys typically originate from `main` / `master` or a release branch.
+   - Check `git status`: warn if there are uncommitted local changes.
+   - Verify local branch is up to date with remote (`git fetch && git status -uno`).
 
-2. **Валидация качества (CI шаги)**:
-   - Запусти линтер и проверку типов (например, `npm run lint`, `tsc --noEmit`).
-   - Запусти тесты (`npm test` или аналогичную команду). Если тесты упали — **немедленно останови деплой**.
+2. **Quality Validation (CI Steps)**:
+   - Run linter and type checker (e.g. `npm run lint`, `tsc --noEmit`).
+   - Run tests (`npm test` or project equivalent). If tests fail, **abort deployment immediately**.
 
-3. **Сборка (Build)**:
-   - Запусти команду сборки продакшн-бандла (`npm run build`, `docker build`, etc.).
-   - Проверь отсутствие ошибок сборки.
+3. **Build**:
+   - Run the production build command (`npm run build`, `docker build`, etc.).
+   - Verify build completes without errors.
 
-4. **Развертывание**:
-   - Выполни команду деплоя проекта (например, скрипт `npm run deploy`, `docker compose up -d`, `vercel --prod`, `firebase deploy`, `kubectl apply` или кастомный скрипт проекта).
-   - Запроси явное подтверждение пользователя перед финальным шагом, если речь идет о боевом сервере (Production).
+4. **Deploy**:
+   - Run the project deployment command (e.g. `npm run deploy`, `docker compose up -d`, `vercel --prod`, `firebase deploy`, `kubectl apply`, or project deployment script).
+   - Ask for explicit user confirmation before executing on Production.
 
-5. **Post-deploy верификация**:
-   - Проверь статус развернутого сервиса (healthcheck, HTTP статус ответа).
-   - Сообщи итоговый статус развертывания.
+5. **Post-deploy Verification**:
+   - Check deployed service health (healthcheck URL, HTTP status).
+   - Report final deployment status.

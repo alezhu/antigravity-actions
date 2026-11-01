@@ -14,6 +14,7 @@ A productivity plugin for Google Antigravity that adds one-click developer workf
 ### 1. Interactive Auxiliary Pane (UI Sidecar)
 * **Real-time Workspace Status**: Displays active Git branch, staged/modified file counts, and the last commit.
 * **One-Click Actions**: Trigger actions directly or copy ready-to-use AI prompts into chat with a single click.
+* **Internationalization (i18n)**: English default with Russian localization included, dynamic language switcher, translatable command prompts, and automatic fallback to English for missing keys.
 * **Integrated Console**: View command outputs and status logs directly in the side pane.
 * **Native Theme Matching**: Adapts seamlessly to light and dark Antigravity themes.
 
@@ -88,6 +89,9 @@ antigravity-actions/
     └── actions-panel/          # Sidecar Web UI
         ├── sidecar.json        # Sidecar declaration
         ├── server.mjs          # Standalone Node.js server
+        ├── locales/            # Localization dictionary files
+        │   ├── en.json         # English (default + fallback)
+        │   └── ru.json         # Russian
         └── public/             # Web dashboard assets
             ├── index.html
             ├── style.css

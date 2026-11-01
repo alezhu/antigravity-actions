@@ -1,38 +1,39 @@
 ---
 name: commit
-description: Автоматическое создание осмысленного git commit. Проверяет staged/unstaged изменения, генерирует сообщение по стандарту Conventional Commits и выполняет коммит.
+description: Automated creation of meaningful git commits. Inspects staged/unstaged changes, generates messages following Conventional Commits, and performs commits.
 ---
 
-# Навык: Smart Git Commit
+# Skill: Smart Git Commit
 
-При вызове этого навыка **в самую первую очередь (первой строкой ответа)** выведи:
-`### ⚡ Выполнение команды: /commit`
+When this skill is invoked, **first and foremost (as the very first line of your response)** output:
+`### ⚡ Executing command: /commit`
 
-## Инструкция по выполнению
+## Instructions
 
-1. **Проверка статуса рабочей директории**:
-   - Выполни команду `git status --short`.
-   - Если изменений нет, сообщи пользователю, что рабочая директория чиста.
+1. **Check Working Directory Status**:
+   - Run `git status --short`.
+   - If there are no changes, inform the user that the working tree is clean.
 
-2. **Анализ изменений**:
-   - Выполни `git diff --cached` (для уже добавленных файлов) и `git diff` (для незакоммиченных изменений).
-   - Убедись, что в коммит не попадают временные файлы, секреты (`.env`, приватные ключи, токены) или артефакты сборки. Если они есть — предупреди пользователя и добавь их в `.gitignore`.
+2. **Analyze Changes**:
+   - Run `git diff --cached` (for staged files) and `git diff` (for unstaged changes).
+   - Ensure that temporary files, secrets (`.env`, private keys, access tokens) or build artifacts are not included. If found, warn the user and add them to `.gitignore`.
 
-3. **Индексация (Staging)**:
-   - Если нет проиндексированных файлов, добавь измененные файлы через `git add <files>` (или `git add -A`, если уместно).
+3. **Staging**:
+   - If no files are staged, stage the relevant modified files via `git add <files>` (or `git add -A` if appropriate).
 
-4. **Генерация сообщения по Conventional Commits**:
-   - Выбери подходящий префикс:
-     - `feat:` новая функциональность
-     - `fix:` исправление ошибки
-     - `refactor:` рефакторинг без изменения функционала
-     - `test:` добавление или исправление тестов
-     - `docs:` изменения в документации
-     - `chore:` рутинные задачи, обновление зависимостей
-     - `style:` форматирование, отступы
-   - Составь краткий и емкий заголовок (до 72 символов).
-   - При необходимости добавь список основных изменений в теле коммита.
+4. **Generate Conventional Commit Message**:
+   - Choose the appropriate type prefix:
+     - `feat:` new feature
+     - `fix:` bug fix
+     - `refactor:` code refactoring without behavior change
+     - `test:` adding or fixing tests
+     - `docs:` documentation updates
+     - `chore:` maintenance, dependencies
+     - `style:` code style, formatting
+   - Compose a concise subject line (up to 72 characters).
+   - Add a brief bulleted list of key changes in the commit body if needed.
+   - Use English by default (or follow the language of the user's prompt).
 
-5. **Выполнение коммита**:
-   - Выполни `git commit -m "..."`.
-   - Покажи пользователю хэш коммита и предложенную команду для отправки: `git push`.
+5. **Execute Commit**:
+   - Run `git commit -m "..."`.
+   - Display the commit hash to the user and suggest the next push command: `git push`. (Do not run `git push` autonomously).

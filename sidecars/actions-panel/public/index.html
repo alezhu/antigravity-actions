@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,24 +12,30 @@
     <header class="header">
       <div class="title-wrap">
         <span class="icon">⚡</span>
-        <h1>Antigravity Actions</h1>
+        <h1 data-i18n="ui.title">Antigravity Actions</h1>
       </div>
-      <span class="status-indicator" id="connStatus" title="Статус связи с чатом">● Подключено</span>
+      <div class="header-controls">
+        <select id="langSelect" class="lang-select" aria-label="Select language" title="Select language">
+          <option value="en">English</option>
+          <option value="ru">Русский</option>
+        </select>
+        <span class="status-indicator" id="connStatus" data-i18n="ui.connectionStatus" data-i18n-title="ui.connectionStatusTitle" title="Chat connection status">● Connected</span>
+      </div>
     </header>
 
     <!-- Active Command Banner (Visible when an action is currently executing in chat) -->
     <div id="activeCommandCard" class="active-command-card hidden">
       <div class="active-command-pulse"></div>
       <div class="active-command-body">
-        <div class="active-command-badge" id="activeCommandBadge">⚡ ВЫПОЛНЯЕТСЯ В ЧАТЕ</div>
+        <div class="active-command-badge" id="activeCommandBadge" data-i18n="ui.activeRunning">⚡ EXECUTING IN CHAT</div>
         <div class="active-command-title" id="activeCommandTitle">/commit</div>
       </div>
-      <div class="active-command-timer" id="activeCommandTimer">0с</div>
+      <div class="active-command-timer" id="activeCommandTimer">0s</div>
     </div>
 
     <div class="banner">
-      Все действия отправляются прямо в чат агенту Antigravity:
-      <b>⚡ Выполнить</b> (сразу запускает команду) или <b>📥 Заполнить</b> (для вставки по Ctrl+V без Enter).
+      <span data-i18n="ui.bannerText">All actions are sent directly to the Antigravity chat agent:</span>
+      <b data-i18n="ui.bannerExecute">⚡ Execute (runs immediately)</b> or <b data-i18n="ui.bannerFill">📥 Fill (copies for Ctrl+V without Enter)</b>.
     </div>
 
     <!-- Actions List -->
@@ -40,19 +46,19 @@
         <div class="action-header">
           <span class="action-icon">📝</span>
           <div class="action-info">
-            <span class="action-name">Commit</span>
-            <span class="action-desc">/commit — Conventional Commit по анализу git diff</span>
+            <span class="action-name" data-i18n="actions.commit.name">Commit</span>
+            <span class="action-desc" data-i18n="actions.commit.desc">/commit — Conventional Commit based on git diff analysis</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="commitInput" placeholder="Сообщение коммита (необязательно)" />
+          <input type="text" id="commitInput" data-i18n-placeholder="actions.commit.placeholder" placeholder="Commit message (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-commit" onclick="handleAction('commit', true)" title="Отправить и сразу выполнить команду агентом в чате">
-            ⚡ Выполнить (Enter)
+          <button class="btn btn-primary" id="btn-run-commit" onclick="handleAction('commit', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
+            ⚡ Execute (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('commit', false)" title="Скопировать для вставки по Ctrl+V в строку чата без немедленного выполнения">
-            📥 Заполнить (без Enter)
+          <button class="btn btn-secondary" onclick="handleAction('commit', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
+            📥 Fill (no Enter)
           </button>
         </div>
       </div>
@@ -62,19 +68,19 @@
         <div class="action-header">
           <span class="action-icon">🔍</span>
           <div class="action-info">
-            <span class="action-name">Code Review</span>
-            <span class="action-desc">/code-review — глубокий анализ багов, безопасности и логики</span>
+            <span class="action-name" data-i18n="actions.codereview.name">Code Review</span>
+            <span class="action-desc" data-i18n="actions.codereview.desc">/code-review — deep review of changes, bugs, and code style</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="reviewInput" placeholder="Файлы или ветка для проверки (необязательно)" />
+          <input type="text" id="reviewInput" data-i18n-placeholder="actions.codereview.placeholder" placeholder="Files or branch to review (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-codereview" onclick="handleAction('codereview', true)" title="Отправить и сразу выполнить ревью в чате">
-            ⚡ Выполнить (Enter)
+          <button class="btn btn-primary" id="btn-run-codereview" onclick="handleAction('codereview', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
+            ⚡ Execute (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('codereview', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
-            📥 Заполнить (без Enter)
+          <button class="btn btn-secondary" onclick="handleAction('codereview', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
+            📥 Fill (no Enter)
           </button>
         </div>
       </div>
@@ -84,19 +90,19 @@
         <div class="action-header">
           <span class="action-icon">🧪</span>
           <div class="action-info">
-            <span class="action-name">Run Tests</span>
-            <span class="action-desc">/run-tests — запуск тестов проекта и диагностика ошибок</span>
+            <span class="action-name" data-i18n="actions.test.name">Run Tests</span>
+            <span class="action-desc" data-i18n="actions.test.desc">/run-tests — run project test suite and diagnose failures</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="testInput" placeholder="Маска или имя теста (необязательно)" />
+          <input type="text" id="testInput" data-i18n-placeholder="actions.test.placeholder" placeholder="Test name or pattern (optional)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-test" onclick="handleAction('test', true)" title="Отправить запуск тестов агенту в чат">
-            ⚡ Выполнить (Enter)
+          <button class="btn btn-primary" id="btn-run-test" onclick="handleAction('test', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
+            ⚡ Execute (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('test', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
-            📥 Заполнить (без Enter)
+          <button class="btn btn-secondary" onclick="handleAction('test', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
+            📥 Fill (no Enter)
           </button>
         </div>
       </div>
@@ -106,19 +112,19 @@
         <div class="action-header">
           <span class="action-icon">🚀</span>
           <div class="action-info">
-            <span class="action-name">Deploy</span>
-            <span class="action-desc">/deploy — сборка и безопасное развертывание проекта</span>
+            <span class="action-name" data-i18n="actions.deploy.name">Deploy</span>
+            <span class="action-desc" data-i18n="actions.deploy.desc">/deploy — build and safe project deployment pipeline</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="deployInput" placeholder="Окружение, например: staging или production" />
+          <input type="text" id="deployInput" data-i18n-placeholder="actions.deploy.placeholder" placeholder="Environment, e.g. staging or production" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-deploy" onclick="handleAction('deploy', true)" title="Отправить процедуру деплоя агенту в чат">
-            ⚡ Выполнить (Enter)
+          <button class="btn btn-primary" id="btn-run-deploy" onclick="handleAction('deploy', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
+            ⚡ Execute (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('deploy', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
-            📥 Заполнить (без Enter)
+          <button class="btn btn-secondary" onclick="handleAction('deploy', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
+            📥 Fill (no Enter)
           </button>
         </div>
       </div>
@@ -128,19 +134,19 @@
         <div class="action-header">
           <span class="action-icon">🏷️</span>
           <div class="action-info">
-            <span class="action-name">Release</span>
-            <span class="action-desc">/release — расчет SemVer, changelog и git-тег</span>
+            <span class="action-name" data-i18n="actions.release.name">Release</span>
+            <span class="action-desc" data-i18n="actions.release.desc">/release — SemVer calculation, changelog, and git tag</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="releaseInput" placeholder="Тип бампа (patch, minor, major или версия)" />
+          <input type="text" id="releaseInput" data-i18n-placeholder="actions.release.placeholder" placeholder="Bump type (patch, minor, major or version)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btn-run-release" onclick="handleAction('release', true)" title="Отправить выпуск релиза агенту в чат">
-            ⚡ Выполнить (Enter)
+          <button class="btn btn-primary" id="btn-run-release" onclick="handleAction('release', true)" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Send and immediately execute command in chat">
+            ⚡ Execute (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('release', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
-            📥 Заполнить (без Enter)
+          <button class="btn btn-secondary" onclick="handleAction('release', false)" data-i18n="ui.btnFill" data-i18n-title="ui.btnFillTitle" title="Copy to clipboard for Ctrl+V in chat without immediate execution">
+            📥 Fill (no Enter)
           </button>
         </div>
       </div>
@@ -150,13 +156,13 @@
     <!-- Activity Log -->
     <section class="console-section">
       <div class="console-header">
-        <span>История действий</span>
-        <button class="btn-small" onclick="clearConsole()">Очистить</button>
+        <span data-i18n="ui.historyTitle">Activity Log</span>
+        <button class="btn-small" onclick="clearConsole()" data-i18n="ui.btnClear">Clear</button>
       </div>
-      <pre id="consoleOutput" class="console-output">Готов к передаче команд в чат Antigravity.</pre>
+      <pre id="consoleOutput" class="console-output" data-i18n="ui.readyStatus">Ready to send commands to Antigravity chat.</pre>
     </section>
 
-    <div id="toast" class="toast">Отправлено!</div>
+    <div id="toast" class="toast">Sent!</div>
   </div>
 
   <script src="app.js"></script>

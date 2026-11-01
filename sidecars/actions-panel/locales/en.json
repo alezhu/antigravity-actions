@@ -1,0 +1,78 @@
+{
+  "code": "en",
+  "name": "English",
+  "ui": {
+    "title": "Antigravity Actions",
+    "connectionStatus": "● Connected",
+    "connectionStatusTitle": "Chat connection status",
+    "activeRunning": "⚡ EXECUTING IN CHAT",
+    "activeCompleted": "✅ COMPLETED",
+    "activeError": "❌ ERROR",
+    "activeCanceled": "⚠️ CANCELED",
+    "bannerText": "All actions are sent directly to the Antigravity chat agent:",
+    "bannerExecute": "⚡ Execute (runs immediately)",
+    "bannerFill": "📥 Fill (copies for Ctrl+V without Enter)",
+    "btnExecute": "⚡ Execute (Enter)",
+    "btnFill": "📥 Fill (no Enter)",
+    "btnExecuteTitle": "Send and immediately execute command in chat",
+    "btnFillTitle": "Copy to clipboard for Ctrl+V in chat without immediate execution",
+    "historyTitle": "Activity Log",
+    "btnClear": "Clear",
+    "readyStatus": "Ready to send commands to Antigravity chat.",
+    "consoleCleared": "Console cleared.",
+    "executingToast": "⚡ Executing: {label}",
+    "completedToast": "✅ {label} completed!",
+    "errorToast": "❌ Execution error: {label}",
+    "canceledToast": "⚠️ Execution canceled: {label}",
+    "copiedToast": "📋 Copied: {cmd}. Press Ctrl+V in chat!",
+    "sendError": "Failed to send message",
+    "connError": "Connection error. Copied command to clipboard (press Ctrl+V)."
+  },
+  "actions": {
+    "commit": {
+      "name": "Commit",
+      "desc": "/commit — Conventional Commit based on git diff analysis",
+      "placeholder": "Commit message (optional)",
+      "command": "/commit",
+      "promptTemplate": "/commit",
+      "promptTemplateWithInput": "/commit \"{input}\"",
+      "displayTitle": "⚡ Commit"
+    },
+    "codereview": {
+      "name": "Code Review",
+      "desc": "/code-review — deep review of changes, bugs, and code style",
+      "placeholder": "Files or branch to review (optional)",
+      "command": "/code-review",
+      "promptTemplate": "/code-review",
+      "promptTemplateWithInput": "/code-review {input}",
+      "displayTitle": "⚡ Code Review"
+    },
+    "test": {
+      "name": "Run Tests",
+      "desc": "/run-tests — run project test suite and diagnose failures",
+      "placeholder": "Test name or pattern (optional)",
+      "command": "/run-tests",
+      "promptTemplate": "/run-tests",
+      "promptTemplateWithInput": "/run-tests {input}",
+      "displayTitle": "⚡ Tests"
+    },
+    "deploy": {
+      "name": "Deploy",
+      "desc": "/deploy — build and safe project deployment pipeline",
+      "placeholder": "Environment, e.g. staging or production",
+      "command": "/deploy",
+      "promptTemplate": "/deploy",
+      "promptTemplateWithInput": "/deploy {input}",
+      "displayTitle": "⚡ Deploy"
+    },
+    "release": {
+      "name": "Release",
+      "desc": "/release — SemVer calculation, changelog, and git tag",
+      "placeholder": "Bump type (patch, minor, major or version)",
+      "command": "/release",
+      "promptTemplate": "/release",
+      "promptTemplateWithInput": "/release {input}",
+      "displayTitle": "⚡ Release"
+    }
+  }
+}

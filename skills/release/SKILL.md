@@ -1,40 +1,40 @@
 ---
 name: release
-description: Подготовка и выпуск релиза. Определяет семантическую версию (SemVer), генерирует Changelog, обновляет файлы манифестов и создает Git-тег.
+description: Release preparation and management. Computes Semantic Versioning (SemVer), generates Changelog, bumps manifest version, and creates Git tag.
 ---
 
-# Навык: Smart Release Management
+# Skill: Smart Release Management
 
-При вызове этого навыка **в самую первую очередь (первой строкой ответа)** выведи:
-`### ⚡ Выполнение команды: /release`
+When this skill is invoked, **first and foremost (as the very first line of your response)** output:
+`### ⚡ Executing command: /release`
 
-Этот навык автоматизирует шаги подготовки и фиксации релиза по методологии Semantic Versioning.
+This skill automates release preparation following Semantic Versioning (SemVer).
 
-## Инструкция по выполнению
+## Instructions
 
-1. **Анализ истории изменений**:
-   - Найди последний тег: `git describe --tags --abbrev=0` (или `git tag -l`).
-   - Получи список коммитов с момента последнего релиза: `git log <last-tag>..HEAD --oneline`.
-   - Проанализируй коммиты по стандартам Conventional Commits:
-     - `feat!:` или `BREAKING CHANGE:` -> увеличение **MAJOR** версии (`1.0.0` -> `2.0.0`).
-     - `feat:` -> увеличение **MINOR** версии (`1.0.0` -> `1.1.0`).
-     - `fix:` / `perf:` / `refactor:` -> увеличение **PATCH** версии (`1.0.0` -> `1.0.1`).
+1. **Analyze Commit History**:
+   - Locate latest tag: `git describe --tags --abbrev=0` (or `git tag -l`).
+   - Retrieve commits since last release: `git log <last-tag>..HEAD --oneline`.
+   - Analyze Conventional Commits:
+     - `feat!:` or `BREAKING CHANGE:` -> increment **MAJOR** (`1.0.0` -> `2.0.0`).
+     - `feat:` -> increment **MINOR** (`1.0.0` -> `1.1.0`).
+     - `fix:` / `perf:` / `refactor:` -> increment **PATCH** (`1.0.0` -> `1.0.1`).
 
-2. **Согласование версии**:
-   - Предложи пользователю вычисленную следующую версию.
+2. **Confirm Version**:
+   - Propose calculated next version to the user.
 
-3. **Обновление файлов версий**:
-   - Обнови версию в `package.json`, `Cargo.toml`, `pyproject.toml`, `VERSION` или аналогичном файле проекта.
+3. **Bump Manifests**:
+   - Update version in `package.json`, `Cargo.toml`, `pyproject.toml`, `VERSION`, `plugin.json` or project equivalent.
 
-4. **Генерация / Обновление CHANGELOG.md**:
-   - Добавь секцию для новой версии с датой.
-   - Сгруппируй изменения:
+4. **Generate / Update CHANGELOG.md**:
+   - Add section for the new version with current date.
+   - Categorize entries:
      - 🚀 Features
      - 🐛 Bug Fixes
      - ⚡ Performance Improvements
      - 📝 Documentation & Maintenance
 
-5. **Создание коммита релиза и Git-тега**:
-   - Закоммить изменения: `git commit -am "chore(release): vX.Y.Z"`.
-   - Создай аннотированный тег: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
-   - Напомни пользователю отправить релиз: `git push origin && git push origin --tags`.
+5. **Create Release Commit & Git Tag**:
+   - Stage and commit: `git commit -am "chore(release): vX.Y.Z"`.
+   - Create annotated tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
+   - Remind the user to push the release: `git push origin && git push origin --tags`. (Do not push autonomously).

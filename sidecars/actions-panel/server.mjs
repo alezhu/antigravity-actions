@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile, stat, existsSync } from "node:fs";
+import { readFile, readdir, stat, existsSync } from "node:fs";
 import { promisify } from "node:util";
 import { join, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +7,7 @@ import os from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, "public");
+const LOCALES_DIR = join(__dirname, "locales");
 
 const PORT = Number(process.env.ANTIGRAVITY_SIDECAR_WEB_PORT || 8910);
 const HOST = "127.0.0.1";
@@ -21,6 +22,7 @@ const MIME_TYPES = {
 };
 
 const readFileAsync = promisify(readFile);
+const readdirAsync = promisify(readdir);
 
 // Helper to query Language Server for currently active conversation ID
 async function getLatestConversationId() {
@@ -63,12 +65,12 @@ async function getTrajectoryStatus(conversationId) {
   const lsAddr = process.env.ANTIGRAVITY_LS_ADDRESS;
   const csrf = process.env.ANTIGRAVITY_CSRF_TOKEN;
   if (!lsAddr || !csrf) {
-    return { ok: false, error: "Языковой сервер Antigravity недоступен" };
+    return { ok: false, error: "Antigravity Language Server unavailable" };
   }
 
   const targetConvId = conversationId || await getLatestConversationId() || process.env.ANTIGRAVITY_CONVERSATION_ID;
   if (!targetConvId) {
-    return { ok: false, error: "Диалог не найден" };
+    return { ok: false, error: "Conversation not found" };
   }
 
   try {
@@ -86,7 +88,7 @@ async function getTrajectoryStatus(conversationId) {
     const data = await res.json();
     const summary = (data.trajectorySummaries || {})[targetConvId];
     if (!summary) {
-      return { ok: false, error: "Траектория не найдена" };
+      return { ok: false, error: "Trajectory not found" };
     }
 
     const status = summary.status || "CASCADE_RUN_STATUS_UNSPECIFIED";
@@ -133,12 +135,12 @@ async function sendToChatRPC(message, conversationId, displayTitle) {
   const lsAddr = process.env.ANTIGRAVITY_LS_ADDRESS;
   const csrf = process.env.ANTIGRAVITY_CSRF_TOKEN;
   if (!lsAddr || !csrf) {
-    return { ok: false, error: "Языковой сервер Antigravity недоступен (переменные окружения отсутствуют)" };
+    return { ok: false, error: "Antigravity Language Server unavailable (environment variables missing)" };
   }
 
   const targetConvId = conversationId || await getLatestConversationId() || process.env.ANTIGRAVITY_CONVERSATION_ID;
   if (!targetConvId) {
-    return { ok: false, error: "Не найден активный диалог Antigravity" };
+    return { ok: false, error: "Active Antigravity conversation not found" };
   }
 
   const title = displayTitle || `⚡ ${message.split("\n")[0].slice(0, 60)}`;
@@ -211,6 +213,56 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  // Locales discovery endpoint: dynamically returns available languages based on files in locales/
+  if (url.pathname === "/api/locales" && req.method === "GET") {
+    try {
+      const files = existsSync(LOCALES_DIR) ? await readdirAsync(LOCALES_DIR) : [];
+      const locales = [];
+      for (const file of files) {
+        if (file.endsWith(".json")) {
+          try {
+            const raw = await readFileAsync(join(LOCALES_DIR, file), "utf-8");
+            const data = JSON.parse(raw);
+            locales.push({
+              code: data.code || file.replace(/\.json$/, ""),
+              name: data.name || file.replace(/\.json$/, "")
+            });
+          } catch {}
+        }
+      }
+      // Ensure English is listed first if present
+      locales.sort((a, b) => (a.code === "en" ? -1 : b.code === "en" ? 1 : a.code.localeCompare(b.code)));
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify(locales));
+      return;
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ error: err.message }));
+      return;
+    }
+  }
+
+  // Single locale endpoint: e.g. /api/locales/en or /api/locales/ru
+  if (url.pathname.startsWith("/api/locales/") && req.method === "GET") {
+    const code = url.pathname.replace(/^\/api\/locales\//, "").replace(/[^a-zA-Z0-9_-]/g, "");
+    const filePath = join(LOCALES_DIR, `${code}.json`);
+    if (existsSync(filePath)) {
+      try {
+        const content = await readFileAsync(filePath, "utf-8");
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(content);
+        return;
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: err.message }));
+        return;
+      }
+    }
+    res.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ error: `Locale '${code}' not found` }));
+    return;
+  }
+
   // Status check endpoint
   if (url.pathname === "/api/status" && (req.method === "GET" || req.method === "POST")) {
     const convId = url.searchParams.get("conversationId") || null;
@@ -233,7 +285,7 @@ const server = createServer(async (req, res) => {
 
         if (!message) {
           res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
-          res.end(JSON.stringify({ ok: false, error: "Текст сообщения пуст" }));
+          res.end(JSON.stringify({ ok: false, error: "Message content cannot be empty" }));
           return;
         }
 

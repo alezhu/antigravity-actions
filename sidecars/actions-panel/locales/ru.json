@@ -1,0 +1,78 @@
+{
+  "code": "ru",
+  "name": "Русский",
+  "ui": {
+    "title": "Antigravity Actions",
+    "connectionStatus": "● Подключено",
+    "connectionStatusTitle": "Статус связи с чатом",
+    "activeRunning": "⚡ ВЫПОЛНЯЕТСЯ В ЧАТЕ",
+    "activeCompleted": "✅ ЗАВЕРШЕНО",
+    "activeError": "❌ ОШИБКА",
+    "activeCanceled": "⚠️ ПРЕРВАНО",
+    "bannerText": "Все действия отправляются прямо в чат агенту Antigravity:",
+    "bannerExecute": "⚡ Выполнить (сразу запускает команду)",
+    "bannerFill": "📥 Заполнить (для вставки по Ctrl+V без Enter)",
+    "btnExecute": "⚡ Выполнить (Enter)",
+    "btnFill": "📥 Заполнить (без Enter)",
+    "btnExecuteTitle": "Отправить и сразу выполнить команду агентом в чате",
+    "btnFillTitle": "Скопировать для вставки по Ctrl+V в строку чата без немедленного выполнения",
+    "historyTitle": "История действий",
+    "btnClear": "Очистить",
+    "readyStatus": "Готов к передаче команд в чат Antigravity.",
+    "consoleCleared": "Консоль очищена.",
+    "executingToast": "⚡ Выполняется: {label}",
+    "completedToast": "✅ {label} выполнено!",
+    "errorToast": "❌ Ошибка выполнения {label}",
+    "canceledToast": "⚠️ Выполнение {label} отменено",
+    "copiedToast": "📋 Скопировано: {cmd}. Нажмите Ctrl+V в чате!",
+    "sendError": "Ошибка отправки",
+    "connError": "Сбой соединения. Команда скопирована в буфер (нажмите Ctrl+V)."
+  },
+  "actions": {
+    "commit": {
+      "name": "Commit",
+      "desc": "/commit — Conventional Commit по анализу git diff",
+      "placeholder": "Сообщение коммита (необязательно)",
+      "command": "/commit",
+      "promptTemplate": "/commit",
+      "promptTemplateWithInput": "/commit \"{input}\"",
+      "displayTitle": "⚡ Commit"
+    },
+    "codereview": {
+      "name": "Code Review",
+      "desc": "/code-review — глубокий анализ багов, безопасности и логики",
+      "placeholder": "Файлы или ветка для проверки (необязательно)",
+      "command": "/code-review",
+      "promptTemplate": "/code-review",
+      "promptTemplateWithInput": "/code-review {input}",
+      "displayTitle": "⚡ Code Review"
+    },
+    "test": {
+      "name": "Run Tests",
+      "desc": "/run-tests — запуск тестов проекта и диагностика ошибок",
+      "placeholder": "Маска или имя теста (необязательно)",
+      "command": "/run-tests",
+      "promptTemplate": "/run-tests",
+      "promptTemplateWithInput": "/run-tests {input}",
+      "displayTitle": "⚡ Tests"
+    },
+    "deploy": {
+      "name": "Deploy",
+      "desc": "/deploy — сборка и безопасное развертывание проекта",
+      "placeholder": "Окружение, например: staging или production",
+      "command": "/deploy",
+      "promptTemplate": "/deploy",
+      "promptTemplateWithInput": "/deploy {input}",
+      "displayTitle": "⚡ Deploy"
+    },
+    "release": {
+      "name": "Release",
+      "desc": "/release — расчет SemVer, changelog и git-тег",
+      "placeholder": "Тип бампа (patch, minor, major или версия)",
+      "command": "/release",
+      "promptTemplate": "/release",
+      "promptTemplateWithInput": "/release {input}",
+      "displayTitle": "⚡ Release"
+    }
+  }
+}

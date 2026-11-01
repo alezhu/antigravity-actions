@@ -1,36 +1,37 @@
 ---
 name: code-review
-description: Глубокий Code Review незакоммиченных изменений или текущей ветки. Проверяет корректность логики, безопасность, потенциальные баги, граничные случаи и соответствие кодстайлу.
+description: In-depth Code Review of uncommitted changes or current branch. Verifies logic correctness, security, potential bugs, edge cases, and style compliance.
 ---
 
-# Навык: Deep Code Review
+# Skill: Deep Code Review
 
-При вызове этого навыка **в самую первую очередь (первой строкой ответа)** выведи:
-`### ⚡ Выполнение команды: /code-review`
+When this skill is invoked, **first and foremost (as the very first line of your response)** output:
+`### ⚡ Executing command: /code-review`
 
-## Инструкция по выполнению
+## Instructions
 
-1. **Сбор изменений**:
-   - Выполни `git diff HEAD` (или сравни с базовой веткой, например `main` / `master` через `git diff main...HEAD`).
-   - Если изменений много, структурируй анализ по затронутым модулям.
+1. **Collect Changes**:
+   - Run `git diff HEAD` (or compare against the base branch like `main` / `master` via `git diff main...HEAD`).
+   - If changes are extensive, organize the analysis by affected modules/components.
 
-2. **Критерии проверки**:
-   - **Корректность и логика**:
-     - Есть ли логические ошибки, утечки ресурсов, гонки (race conditions)?
-     - Обработаны ли крайние и исключительные случаи (null/undefined, пустые массивы, сбои сети)?
-   - **Безопасность**:
-     - Нет ли инъекций (SQL, Command Injection, XSS)?
-     - Нет ли утечек секретов, токенов, ключей в открытом виде?
-     - Корректна ли валидация входных данных?
-   - **Производительность**:
-     - Нет ли N+1 запросов, лишних рендеров, тяжелых синхронных блокировок?
-   - **Архитектура и читаемость**:
-     - Понятны ли имена переменных и функций?
-     - Соблюден ли принцип единственной ответственности (SRP)?
+2. **Review Criteria**:
+   - **Correctness and Logic**:
+     - Are there logical errors, resource leaks, or race conditions?
+     - Are boundary conditions and error states handled (null/undefined, empty arrays, network timeouts)?
+   - **Security**:
+     - Are there injection vulnerabilities (SQL, Command Injection, XSS)?
+     - Are secrets, keys, or credentials exposed?
+     - Is input validation properly enforced?
+   - **Performance**:
+     - Are there N+1 queries, unnecessary re-renders, or heavy synchronous blocks?
+   - **Architecture & Readability**:
+     - Are identifier names clear and concise?
+     - Is the Single Responsibility Principle (SRP) maintained?
 
-3. **Формат отчета**:
-   - **Краткая сводка (Summary)**: общий вердикт (LGTM / Требуются исправления / Критические замечания).
-   - **Замечания по файлам**:
-     - `Файл:строка` — суть проблемы и уровень серьезности (🚨 Critical, ⚠️ Warning, 💡 Suggestion).
-     - Конкретный пример рекомендуемого исправления (diff-блок).
-   - **Позитивные моменты**: что сделано хорошо.
+3. **Report Format**:
+   - **Summary**: Overall verdict (LGTM / Changes Requested / Critical Issues).
+   - **File Findings**:
+     - `file:line` — issue description and severity level (🚨 Critical, ⚠️ Warning, 💡 Suggestion).
+     - Concrete diff/code block illustrating the recommended fix.
+   - **Positive Highlights**: What was designed or implemented well.
+   - Default report language is English (or the user's requested language).

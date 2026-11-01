@@ -17,6 +17,16 @@
       <span class="status-indicator" id="connStatus" title="Статус связи с чатом">● Подключено</span>
     </header>
 
+    <!-- Active Command Banner (Visible when an action is currently executing in chat) -->
+    <div id="activeCommandCard" class="active-command-card hidden">
+      <div class="active-command-pulse"></div>
+      <div class="active-command-body">
+        <div class="active-command-badge" id="activeCommandBadge">⚡ ВЫПОЛНЯЕТСЯ В ЧАТЕ</div>
+        <div class="active-command-title" id="activeCommandTitle">/commit</div>
+      </div>
+      <div class="active-command-timer" id="activeCommandTimer">0с</div>
+    </div>
+
     <div class="banner">
       Все действия отправляются прямо в чат агенту Antigravity:
       <b>⚡ Выполнить</b> (сразу запускает команду) или <b>📥 Заполнить</b> (для вставки по Ctrl+V без Enter).
@@ -26,7 +36,7 @@
     <section class="actions-section">
 
       <!-- Commit Action -->
-      <div class="action-card">
+      <div class="action-card" id="card-commit">
         <div class="action-header">
           <span class="action-icon">📝</span>
           <div class="action-info">
@@ -38,7 +48,7 @@
           <input type="text" id="commitInput" placeholder="Сообщение коммита (необязательно)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="handleAction('commit', true)" title="Отправить и сразу выполнить команду агентом в чате">
+          <button class="btn btn-primary" id="btn-run-commit" onclick="handleAction('commit', true)" title="Отправить и сразу выполнить команду агентом в чате">
             ⚡ Выполнить (Enter)
           </button>
           <button class="btn btn-secondary" onclick="handleAction('commit', false)" title="Скопировать для вставки по Ctrl+V в строку чата без немедленного выполнения">
@@ -48,7 +58,7 @@
       </div>
 
       <!-- Code Review Action -->
-      <div class="action-card">
+      <div class="action-card" id="card-codereview">
         <div class="action-header">
           <span class="action-icon">🔍</span>
           <div class="action-info">
@@ -60,7 +70,7 @@
           <input type="text" id="reviewInput" placeholder="Файлы или ветка для проверки (необязательно)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="handleAction('codereview', true)" title="Отправить и сразу выполнить ревью в чате">
+          <button class="btn btn-primary" id="btn-run-codereview" onclick="handleAction('codereview', true)" title="Отправить и сразу выполнить ревью в чате">
             ⚡ Выполнить (Enter)
           </button>
           <button class="btn btn-secondary" onclick="handleAction('codereview', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
@@ -70,7 +80,7 @@
       </div>
 
       <!-- Run Tests Action -->
-      <div class="action-card">
+      <div class="action-card" id="card-test">
         <div class="action-header">
           <span class="action-icon">🧪</span>
           <div class="action-info">
@@ -82,7 +92,7 @@
           <input type="text" id="testInput" placeholder="Маска или имя теста (необязательно)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="handleAction('test', true)" title="Отправить запуск тестов агенту в чат">
+          <button class="btn btn-primary" id="btn-run-test" onclick="handleAction('test', true)" title="Отправить запуск тестов агенту в чат">
             ⚡ Выполнить (Enter)
           </button>
           <button class="btn btn-secondary" onclick="handleAction('test', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
@@ -92,7 +102,7 @@
       </div>
 
       <!-- Deploy Action -->
-      <div class="action-card">
+      <div class="action-card" id="card-deploy">
         <div class="action-header">
           <span class="action-icon">🚀</span>
           <div class="action-info">
@@ -104,7 +114,7 @@
           <input type="text" id="deployInput" placeholder="Окружение, например: staging или production" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="handleAction('deploy', true)" title="Отправить процедуру деплоя агенту в чат">
+          <button class="btn btn-primary" id="btn-run-deploy" onclick="handleAction('deploy', true)" title="Отправить процедуру деплоя агенту в чат">
             ⚡ Выполнить (Enter)
           </button>
           <button class="btn btn-secondary" onclick="handleAction('deploy', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
@@ -114,7 +124,7 @@
       </div>
 
       <!-- Release Action -->
-      <div class="action-card">
+      <div class="action-card" id="card-release">
         <div class="action-header">
           <span class="action-icon">🏷️</span>
           <div class="action-info">
@@ -126,7 +136,7 @@
           <input type="text" id="releaseInput" placeholder="Тип бампа (patch, minor, major или версия)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="handleAction('release', true)" title="Отправить выпуск релиза агенту в чат">
+          <button class="btn btn-primary" id="btn-run-release" onclick="handleAction('release', true)" title="Отправить выпуск релиза агенту в чат">
             ⚡ Выполнить (Enter)
           </button>
           <button class="btn btn-secondary" onclick="handleAction('release', false)" title="Скопировать для вставки по Ctrl+V в строку чата">

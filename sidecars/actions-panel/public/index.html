@@ -14,35 +14,16 @@
         <span class="icon">⚡</span>
         <h1>Antigravity Actions</h1>
       </div>
-      <button id="refreshBtn" class="btn-icon" title="Обновить статус">🔄</button>
+      <span class="status-indicator" id="connStatus" title="Статус связи с чатом">● Подключено</span>
     </header>
 
-    <!-- Workspace Selector Bar -->
-    <div class="workspace-bar">
-      <span class="workspace-label">📁 Проект:</span>
-      <input type="text" id="workspaceInput" class="workspace-input" placeholder="D:\Projects\Web\Front\antigravity-actions" />
-      <button id="setWorkspaceBtn" class="btn-small" title="Применить путь к проекту">OK</button>
-    </div>
-
-    <!-- Git Status Badge -->
-    <div id="statusCard" class="card status-card">
-      <div class="status-row">
-        <span class="label">Ветка:</span>
-        <span id="gitBranch" class="badge">Загрузка...</span>
-      </div>
-      <div class="status-row">
-        <span class="label">Изменения:</span>
-        <span id="gitChanges" class="badge badge-accent">...</span>
-      </div>
-      <div class="status-row">
-        <span class="label">Последний коммит:</span>
-        <span id="gitLastCommit" class="commit-text">...</span>
-      </div>
+    <div class="banner">
+      Все действия отправляются прямо в чат агенту Antigravity:
+      <b>⚡ Выполнить</b> (сразу запускает команду) или <b>📥 Заполнить</b> (для вставки по Ctrl+V без Enter).
     </div>
 
     <!-- Actions List -->
     <section class="actions-section">
-      <h2 class="section-title">Быстрые действия</h2>
 
       <!-- Commit Action -->
       <div class="action-card">
@@ -50,18 +31,18 @@
           <span class="action-icon">📝</span>
           <div class="action-info">
             <span class="action-name">Commit</span>
-            <span class="action-desc">Conventional commit по git diff</span>
+            <span class="action-desc">/commit — Conventional Commit по анализу git diff</span>
           </div>
         </div>
         <div class="action-inputs">
-          <input type="text" id="commitMsgInput" placeholder="Сообщение коммита (пустое = авто-генерация)" />
+          <input type="text" id="commitInput" placeholder="Сообщение коммита (необязательно)" />
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="triggerAction('commit')">
-            ▶ Сделать коммит
+          <button class="btn btn-primary" onclick="handleAction('commit', true)" title="Отправить и сразу выполнить команду агентом в чате">
+            ⚡ Выполнить (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="sendPromptToChat('commit')" title="Отправить задачу AI-агенту в чат">
-            🤖 В чат агенту
+          <button class="btn btn-secondary" onclick="handleAction('commit', false)" title="Скопировать для вставки по Ctrl+V в строку чата без немедленного выполнения">
+            📥 Заполнить (без Enter)
           </button>
         </div>
       </div>
@@ -72,15 +53,18 @@
           <span class="action-icon">🔍</span>
           <div class="action-info">
             <span class="action-name">Code Review</span>
-            <span class="action-desc">Анализ багов, безопасности и логики</span>
+            <span class="action-desc">/code-review — глубокий анализ багов, безопасности и логики</span>
           </div>
         </div>
+        <div class="action-inputs">
+          <input type="text" id="reviewInput" placeholder="Файлы или ветка для проверки (необязательно)" />
+        </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="triggerAction('codereview')">
-            ▶ Проверить Diff
+          <button class="btn btn-primary" onclick="handleAction('codereview', true)" title="Отправить и сразу выполнить ревью в чате">
+            ⚡ Выполнить (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="sendPromptToChat('codereview')" title="Отправить задачу AI-агенту в чат">
-            🤖 В чат агенту
+          <button class="btn btn-secondary" onclick="handleAction('codereview', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
+            📥 Заполнить (без Enter)
           </button>
         </div>
       </div>
@@ -91,15 +75,18 @@
           <span class="action-icon">🧪</span>
           <div class="action-info">
             <span class="action-name">Run Tests</span>
-            <span class="action-desc">Запуск тестов и поиск ошибок</span>
+            <span class="action-desc">/run-tests — запуск тестов проекта и диагностика ошибок</span>
           </div>
         </div>
+        <div class="action-inputs">
+          <input type="text" id="testInput" placeholder="Маска или имя теста (необязательно)" />
+        </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="triggerAction('test')">
-            ▶ Запустить тесты
+          <button class="btn btn-primary" onclick="handleAction('test', true)" title="Отправить запуск тестов агенту в чат">
+            ⚡ Выполнить (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="sendPromptToChat('test')" title="Отправить задачу AI-агенту в чат">
-            🤖 В чат агенту
+          <button class="btn btn-secondary" onclick="handleAction('test', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
+            📥 Заполнить (без Enter)
           </button>
         </div>
       </div>
@@ -110,15 +97,18 @@
           <span class="action-icon">🚀</span>
           <div class="action-info">
             <span class="action-name">Deploy</span>
-            <span class="action-desc">Сборка и безопасный деплой</span>
+            <span class="action-desc">/deploy — сборка и безопасное развертывание проекта</span>
           </div>
         </div>
+        <div class="action-inputs">
+          <input type="text" id="deployInput" placeholder="Окружение, например: staging или production" />
+        </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="triggerAction('deploy')">
-            ▶ Запустить деплой
+          <button class="btn btn-primary" onclick="handleAction('deploy', true)" title="Отправить процедуру деплоя агенту в чат">
+            ⚡ Выполнить (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="sendPromptToChat('deploy')" title="Отправить задачу AI-агенту в чат">
-            🤖 В чат агенту
+          <button class="btn btn-secondary" onclick="handleAction('deploy', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
+            📥 Заполнить (без Enter)
           </button>
         </div>
       </div>
@@ -129,30 +119,34 @@
           <span class="action-icon">🏷️</span>
           <div class="action-info">
             <span class="action-name">Release</span>
-            <span class="action-desc">SemVer бамп, Changelog и Git Tag</span>
+            <span class="action-desc">/release — расчет SemVer, changelog и git-тег</span>
           </div>
         </div>
+        <div class="action-inputs">
+          <input type="text" id="releaseInput" placeholder="Тип бампа (patch, minor, major или версия)" />
+        </div>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="triggerAction('release')">
-            ▶ Проверить релиз
+          <button class="btn btn-primary" onclick="handleAction('release', true)" title="Отправить выпуск релиза агенту в чат">
+            ⚡ Выполнить (Enter)
           </button>
-          <button class="btn btn-secondary" onclick="sendPromptToChat('release')" title="Отправить задачу AI-агенту в чат">
-            🤖 В чат агенту
+          <button class="btn btn-secondary" onclick="handleAction('release', false)" title="Скопировать для вставки по Ctrl+V в строку чата">
+            📥 Заполнить (без Enter)
           </button>
         </div>
       </div>
+
     </section>
 
-    <!-- Console Output -->
+    <!-- Activity Log -->
     <section class="console-section">
       <div class="console-header">
-        <span>Лог выполнения</span>
+        <span>История действий</span>
         <button class="btn-small" onclick="clearConsole()">Очистить</button>
       </div>
-      <pre id="consoleOutput" class="console-output">Готов к работе. Выберите действие выше.</pre>
+      <pre id="consoleOutput" class="console-output">Готов к передаче команд в чат Antigravity.</pre>
     </section>
 
-    <div id="toast" class="toast">Готово!</div>
+    <div id="toast" class="toast">Отправлено!</div>
   </div>
 
   <script src="app.js"></script>

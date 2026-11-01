@@ -9,15 +9,11 @@
     "activeCompleted": "✅ COMPLETED",
     "activeError": "❌ ERROR",
     "activeCanceled": "⚠️ CANCELED",
-    "bannerIntro": "Each action provides 4 options: <b>⚡ Execute</b> (runs immediately), <b>⌨️ Command</b> (inserts slash-command), <b>💬 Prompt</b> (inserts AI prompt), and <b>📋 Copy</b> (copies both).",
+    "bannerIntro": "All actions can be sent directly to Antigravity chat: <b>⚡ Execute</b> (runs immediately) or <b>📋 Copy</b> (copies AI prompt to clipboard for Ctrl+V).",
     "btnExecute": "⚡ Execute",
-    "btnCommand": "⌨️ Command",
-    "btnPrompt": "💬 Prompt",
     "btnCopy": "📋 Copy",
     "btnExecuteTitle": "Execute command immediately in chat",
-    "btnCommandTitle": "Copy slash command to insert into chat (Ctrl+V)",
-    "btnPromptTitle": "Copy AI prompt to insert into chat (Ctrl+V)",
-    "btnCopyTitle": "Copy slash command and full prompt to clipboard",
+    "btnCopyTitle": "Copy AI prompt to clipboard (paste with Ctrl+V in chat)",
     "historyTitle": "Activity Log",
     "btnClear": "Clear",
     "readyStatus": "Ready to send commands to Antigravity chat.",
@@ -26,11 +22,9 @@
     "completedToast": "✅ {label} completed!",
     "errorToast": "❌ Execution error: {label}",
     "canceledToast": "⚠️ Execution canceled: {label}",
-    "toastCommandCopied": "📋 Command copied: {cmd}. Press Ctrl+V in chat!",
-    "toastPromptCopied": "💬 Prompt copied! Press Ctrl+V in chat to edit or send.",
-    "toastBothCopied": "📋 Command and prompt copied to clipboard!",
+    "toastPromptCopied": "📋 Prompt copied to clipboard! Press Ctrl+V in chat.",
     "sendError": "Failed to send message",
-    "connError": "Connection error. Copied command to clipboard (press Ctrl+V)."
+    "connError": "Connection error. Copied prompt to clipboard (press Ctrl+V)."
   },
   "actions": {
     "commit": {

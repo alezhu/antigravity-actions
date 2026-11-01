@@ -9,15 +9,11 @@
     "activeCompleted": "✅ ЗАВЕРШЕНО",
     "activeError": "❌ ОШИБКА",
     "activeCanceled": "⚠️ ПРЕРВАНО",
-    "bannerIntro": "Для каждой команды доступны 4 действия: <b>⚡ Execute</b> (запуск), <b>⌨️ Command</b> (вставка команды), <b>💬 Prompt</b> (вставка промпта) и <b>📋 Copy</b> (копирование обоих).",
+    "bannerIntro": "Все действия отправляются прямо в чат агенту Antigravity: <b>⚡ Execute</b> (сразу запускает команду) или <b>📋 Copy</b> (копирует промпт для вставки по Ctrl+V).",
     "btnExecute": "⚡ Execute",
-    "btnCommand": "⌨️ Command",
-    "btnPrompt": "💬 Prompt",
     "btnCopy": "📋 Copy",
     "btnExecuteTitle": "Сразу отправить и запустить команду в чате",
-    "btnCommandTitle": "Скопировать слэш-команду для вставки в чат (Ctrl+V)",
-    "btnPromptTitle": "Скопировать текстовый промпт для вставки в чат (Ctrl+V)",
-    "btnCopyTitle": "Скопировать слэш-команду и полный промпт в буфер обмена",
+    "btnCopyTitle": "Скопировать промпт в буфер обмена для вставки в чат (Ctrl+V)",
     "historyTitle": "История действий",
     "btnClear": "Очистить",
     "readyStatus": "Готов к передаче команд в чат Antigravity.",
@@ -26,11 +22,9 @@
     "completedToast": "✅ {label} выполнено!",
     "errorToast": "❌ Ошибка выполнения {label}",
     "canceledToast": "⚠️ Выполнение {label} отменено",
-    "toastCommandCopied": "📋 Команда скопирована: {cmd}. Нажмите Ctrl+V в чате!",
-    "toastPromptCopied": "💬 Промпт скопирован! Нажмите Ctrl+V в чате для редактирования.",
-    "toastBothCopied": "📋 Команда и промпт скопированы в буфер обмена!",
+    "toastPromptCopied": "📋 Промпт скопирован в буфер! Нажмите Ctrl+V в чате.",
     "sendError": "Ошибка отправки",
-    "connError": "Сбой соединения. Команда скопирована в буфер (нажмите Ctrl+V)."
+    "connError": "Сбой соединения. Промпт скопирован в буфер (нажмите Ctrl+V)."
   },
   "actions": {
     "commit": {

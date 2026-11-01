@@ -386,11 +386,9 @@ async function copyToClipboard(text) {
   }
 }
 
-// Main handler for the 4 action button modes:
+// Main handler for action button modes:
 // 1. "execute": Runs command immediately in chat
-// 2. "command": Inserts slash-command into chat (copies to clipboard for Ctrl+V)
-// 3. "prompt":  Inserts AI prompt into chat (copies to clipboard for Ctrl+V)
-// 4. "copy":    Copies both slash-command and prompt to clipboard
+// 2. "copy":    Copies full AI prompt to clipboard for Ctrl+V
 async function handleAction(action, mode = "execute", btnElement = null) {
   const meta = getActionMeta(action);
   if (!meta.cmd) return;
@@ -434,36 +432,14 @@ async function handleAction(action, mode = "execute", btnElement = null) {
       break;
     }
 
-    case "command": {
-      // ⌨️ Command: copy slash command to insert into chat (Ctrl+V) without Enter
-      logToConsole(`⌨️ [COMMAND]: "${meta.cmd}"\n📋 Copied to clipboard. Paste into chat via Ctrl+V.`);
-      await copyToClipboard(meta.cmd);
-      // Attempt postMessage to parent frame as progressive enhancement
-      try {
-        window.parent?.postMessage({ type: "insert-chat", text: meta.cmd }, "*");
-      } catch {}
-      showToast(t("ui.toastCommandCopied", { cmd: meta.cmd }));
-      break;
-    }
-
-    case "prompt": {
-      // 💬 Prompt: copy AI prompt to insert into chat (Ctrl+V) without Enter
-      logToConsole(`💬 [PROMPT]: "${meta.prompt}"\n📋 Copied to clipboard. Paste into chat via Ctrl+V.`);
-      await copyToClipboard(meta.prompt);
-      // Attempt postMessage to parent frame as progressive enhancement
-      try {
-        window.parent?.postMessage({ type: "insert-chat", text: meta.prompt }, "*");
-      } catch {}
-      showToast(t("ui.toastPromptCopied"));
-      break;
-    }
-
     case "copy": {
-      // 📋 Copy: copy slash command AND its full prompt together
-      const combined = `${meta.cmd}\n\n${meta.prompt}`;
-      logToConsole(`📋 [COPY]: Slash command & prompt copied to clipboard:\n${combined}`);
-      await copyToClipboard(combined);
-      showToast(t("ui.toastBothCopied"));
+      // 📋 Copy: copy AI prompt to clipboard and shift focus to parent window
+      await copyToClipboard(meta.prompt);
+      try {
+        window.parent?.focus();
+      } catch {}
+      logToConsole(`📋 [COPY]: Prompt copied to clipboard:\n"${meta.prompt}"\nPaste into chat via Ctrl+V.`);
+      showToast(t("ui.toastPromptCopied"));
       break;
     }
   }

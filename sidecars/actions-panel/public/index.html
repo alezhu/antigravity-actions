@@ -35,7 +35,7 @@
 
     <!-- Description Banner -->
     <div class="banner" id="bannerIntro" data-i18n-html="ui.bannerIntro">
-      Each action provides 4 options: <b>⚡ Execute</b> (runs immediately), <b>⌨️ Command</b> (inserts slash-command), <b>💬 Prompt</b> (inserts AI prompt), and <b>📋 Copy</b> (copies both).
+      All actions can be sent directly to Antigravity chat: <b>⚡ Execute</b> (runs immediately) or <b>📋 Copy</b> (copies AI prompt to clipboard for Ctrl+V).
     </div>
 
     <!-- Actions List -->
@@ -57,13 +57,7 @@
           <button class="btn btn-primary" id="btn-exec-commit" onclick="handleAction('commit', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
             ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('commit', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
-            ⌨️ Command
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('commit', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
-            💬 Prompt
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('commit', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+          <button class="btn btn-secondary" onclick="handleAction('commit', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
             📋 Copy
           </button>
         </div>
@@ -85,13 +79,7 @@
           <button class="btn btn-primary" id="btn-exec-codereview" onclick="handleAction('codereview', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
             ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('codereview', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
-            ⌨️ Command
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('codereview', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
-            💬 Prompt
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('codereview', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+          <button class="btn btn-secondary" onclick="handleAction('codereview', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
             📋 Copy
           </button>
         </div>
@@ -113,13 +101,7 @@
           <button class="btn btn-primary" id="btn-exec-test" onclick="handleAction('test', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
             ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('test', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
-            ⌨️ Command
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('test', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
-            💬 Prompt
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('test', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+          <button class="btn btn-secondary" onclick="handleAction('test', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
             📋 Copy
           </button>
         </div>
@@ -141,13 +123,7 @@
           <button class="btn btn-primary" id="btn-exec-deploy" onclick="handleAction('deploy', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
             ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('deploy', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
-            ⌨️ Command
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('deploy', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
-            💬 Prompt
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('deploy', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+          <button class="btn btn-secondary" onclick="handleAction('deploy', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
             📋 Copy
           </button>
         </div>
@@ -169,13 +145,7 @@
           <button class="btn btn-primary" id="btn-exec-release" onclick="handleAction('release', 'execute')" data-i18n="ui.btnExecute" data-i18n-title="ui.btnExecuteTitle" title="Execute command immediately in chat">
             ⚡ Execute
           </button>
-          <button class="btn btn-secondary" onclick="handleAction('release', 'command')" data-i18n="ui.btnCommand" data-i18n-title="ui.btnCommandTitle" title="Copy slash command to insert into chat (Ctrl+V)">
-            ⌨️ Command
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('release', 'prompt')" data-i18n="ui.btnPrompt" data-i18n-title="ui.btnPromptTitle" title="Copy AI prompt to insert into chat (Ctrl+V)">
-            💬 Prompt
-          </button>
-          <button class="btn btn-secondary" onclick="handleAction('release', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy slash command and full prompt to clipboard">
+          <button class="btn btn-secondary" onclick="handleAction('release', 'copy')" data-i18n="ui.btnCopy" data-i18n-title="ui.btnCopyTitle" title="Copy prompt to clipboard">
             📋 Copy
           </button>
         </div>

@@ -288,20 +288,14 @@ h1 {
 
 .btn-group {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-
-@media (max-width: 440px) {
-  .btn-group {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .btn {
-  padding: 6px 8px;
+  padding: 7px 12px;
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
@@ -309,7 +303,7 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   white-space: nowrap;
 }
 

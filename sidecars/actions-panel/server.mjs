@@ -765,7 +765,7 @@ const server = createServer(async (req, res) => {
     }
     res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
     res.end(JSON.stringify({
-      version: "1.1.0",
+      version: "1.2.0",
       name: "antigravity-actions",
       displayName: "Antigravity Actions",
       repository: "https://github.com/alezhu/antigravity-actions"

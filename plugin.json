@@ -1,7 +1,7 @@
 {
   "name": "antigravity-actions",
   "displayName": "Antigravity Actions",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "One-click developer actions and skills: Run Tests, Code Review, Commit, Push, Release.",
   "logo": "assets/logo.svg",
   "author": {

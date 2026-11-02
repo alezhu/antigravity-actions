@@ -1,6 +1,6 @@
 {
   "name": "antigravity-actions",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Antigravity plugin with one-click actions: Run Tests, Code Review, Commit, Push, Release",
   "type": "module",
   "main": "sidecars/actions-panel/server.mjs",

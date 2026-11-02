@@ -8,6 +8,7 @@ import os from "node:os";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, "public");
 const LOCALES_DIR = join(__dirname, "locales");
+const SKILLS_DIR = join(__dirname, "..", "..", "skills");
 
 const PORT = Number(process.env.ANTIGRAVITY_SIDECAR_WEB_PORT || 8910);
 const HOST = "127.0.0.1";
@@ -18,7 +19,10 @@ const MIME_TYPES = {
   ".js": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
-  ".png": "image/png"
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg"
 };
 
 const readFileAsync = promisify(readFile);
@@ -53,6 +57,156 @@ try {
   }
 } catch (e) {
   console.warn("Failed to watch LOCALES_DIR:", e);
+}
+
+try {
+  if (existsSync(SKILLS_DIR)) {
+    watch(SKILLS_DIR, { recursive: true }, () => notifyReloadClients());
+  }
+} catch (e) {
+  console.warn("Failed to watch SKILLS_DIR:", e);
+}
+
+// Parse YAML frontmatter from markdown files
+function parseFrontmatter(markdown) {
+  const match = (markdown || "").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+  const yaml = match[1];
+  const result = {};
+  for (const line of yaml.split(/\r?\n/)) {
+    const colonIdx = line.indexOf(":");
+    if (colonIdx > 0) {
+      const key = line.slice(0, colonIdx).trim();
+      const val = line.slice(colonIdx + 1).trim();
+      result[key] = val;
+    }
+  }
+  return result;
+}
+
+// Dynamic discovery of actions from skills subdirectories
+async function discoverActions() {
+  if (!existsSync(SKILLS_DIR)) return [];
+
+  let entries = [];
+  try {
+    entries = await readdirAsync(SKILLS_DIR);
+  } catch (err) {
+    console.warn("Failed to read SKILLS_DIR:", err);
+    return [];
+  }
+
+  const actions = [];
+
+  for (const entry of entries) {
+    const skillPath = join(SKILLS_DIR, entry);
+    try {
+      const st = await promisify(stat)(skillPath);
+      if (!st.isDirectory()) continue;
+    } catch {
+      continue;
+    }
+
+    let actionConfig = {};
+    const actionJsonPath = join(skillPath, "action.json");
+    if (existsSync(actionJsonPath)) {
+      try {
+        const raw = await readFileAsync(actionJsonPath, "utf-8");
+        actionConfig = JSON.parse(raw);
+      } catch (err) {
+        console.warn(`Failed to parse ${actionJsonPath}:`, err);
+      }
+    }
+
+    let skillMeta = {};
+    const skillMdPath = join(skillPath, "SKILL.md");
+    if (existsSync(skillMdPath)) {
+      try {
+        const rawMd = await readFileAsync(skillMdPath, "utf-8");
+        skillMeta = parseFrontmatter(rawMd);
+      } catch {}
+    }
+
+    // Discover icon file in the skill folder
+    let iconUrl = null;
+    const possibleIcons = ["icon.svg", "icon.png", "icon.webp", "icon.jpg", "icon.jpeg"];
+    for (const f of possibleIcons) {
+      if (existsSync(join(skillPath, f))) {
+        iconUrl = `/api/skills/${encodeURIComponent(entry)}/icon`;
+        break;
+      }
+    }
+
+    // Discover locales in skills/<name>/locales/
+    const skillLocales = {};
+    const localesSubdir = join(skillPath, "locales");
+    if (existsSync(localesSubdir)) {
+      try {
+        const locFiles = await readdirAsync(localesSubdir);
+        for (const lf of locFiles) {
+          if (lf.endsWith(".json")) {
+            const langCode = lf.replace(/\.json$/, "");
+            try {
+              const rawLoc = await readFileAsync(join(localesSubdir, lf), "utf-8");
+              skillLocales[langCode] = JSON.parse(rawLoc);
+            } catch {}
+          }
+        }
+      } catch {}
+    }
+
+    // Also support inline locales inside action.json
+    if (actionConfig.locales && typeof actionConfig.locales === "object") {
+      for (const [lang, locObj] of Object.entries(actionConfig.locales)) {
+        skillLocales[lang] = Object.assign({}, skillLocales[lang] || {}, locObj);
+      }
+    }
+
+    const actionId = actionConfig.id || entry;
+    const command = actionConfig.command || `/${actionId}`;
+    const defaultName = skillMeta.name || actionConfig.name || actionId;
+    const defaultDesc = skillMeta.description || actionConfig.desc || `${command} — execute ${defaultName}`;
+
+    // Ensure English locale exists as baseline
+    if (!skillLocales.en) {
+      skillLocales.en = {
+        name: defaultName,
+        desc: defaultDesc,
+        placeholder: "",
+        command,
+        promptTemplate: command,
+        promptTemplateWithInput: `${command} {input}`,
+        prompt: defaultDesc,
+        promptWithInput: `${defaultDesc} for {input}`,
+        displayTitle: `⚡ ${defaultName}`
+      };
+    }
+
+    // Resolve emoji fallback
+    let emoji = actionConfig.emoji;
+    if (!emoji) {
+      if (actionConfig.icon && !actionConfig.icon.includes(".")) {
+        emoji = actionConfig.icon;
+      } else {
+        emoji = "⚡";
+      }
+    }
+
+    actions.push({
+      id: actionId,
+      folder: entry,
+      aliases: Array.isArray(actionConfig.aliases) ? actionConfig.aliases : [],
+      command,
+      order: typeof actionConfig.order === "number" ? actionConfig.order : 100,
+      emoji,
+      iconUrl,
+      hasInput: actionConfig.hasInput !== undefined ? actionConfig.hasInput : true,
+      locales: skillLocales
+    });
+  }
+
+  actions.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+  return actions;
 }
 
 // Helper to query Language Server for currently active conversation ID
@@ -464,23 +618,81 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  // Locales discovery endpoint: dynamically returns available languages based on files in locales/
+  // Actions discovery endpoint: dynamically discovers skills and their metadata
+  if (url.pathname === "/api/actions" && req.method === "GET") {
+    try {
+      const actions = await discoverActions();
+      res.writeHead(200, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      });
+      res.end(JSON.stringify(actions));
+      return;
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ error: err.message }));
+      return;
+    }
+  }
+
+  // Skill icon serving endpoint: e.g. /api/skills/run-tests/icon
+  if (url.pathname.startsWith("/api/skills/") && url.pathname.endsWith("/icon") && req.method === "GET") {
+    const rawSkillName = url.pathname.replace(/^\/api\/skills\//, "").replace(/\/icon$/, "");
+    const skillName = decodeURIComponent(rawSkillName);
+    const skillFolder = join(SKILLS_DIR, skillName);
+    const possibleIcons = ["icon.svg", "icon.png", "icon.webp", "icon.jpg", "icon.jpeg"];
+
+    for (const f of possibleIcons) {
+      const iconPath = join(skillFolder, f);
+      if (existsSync(iconPath)) {
+        try {
+          const ext = extname(iconPath);
+          const contentType = MIME_TYPES[ext] || "image/svg+xml";
+          const content = await readFileAsync(iconPath);
+          res.writeHead(200, {
+            "Content-Type": contentType,
+            "Cache-Control": "public, max-age=3600"
+          });
+          res.end(content);
+          return;
+        } catch {}
+      }
+    }
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Icon not found");
+    return;
+  }
+
+  // Locales discovery endpoint: dynamically returns available languages based on files in locales/ and skills/
   if (url.pathname === "/api/locales" && req.method === "GET") {
     try {
       const files = existsSync(LOCALES_DIR) ? await readdirAsync(LOCALES_DIR) : [];
-      const locales = [];
+      const localeMap = new Map();
+
       for (const file of files) {
         if (file.endsWith(".json")) {
           try {
             const raw = await readFileAsync(join(LOCALES_DIR, file), "utf-8");
             const data = JSON.parse(raw);
-            locales.push({
-              code: data.code || file.replace(/\.json$/, ""),
-              name: data.name || file.replace(/\.json$/, "")
-            });
+            const code = data.code || file.replace(/\.json$/, "");
+            localeMap.set(code, data.name || code);
           } catch {}
         }
       }
+
+      // Also inspect skills for any additional locale codes
+      const actions = await discoverActions();
+      for (const act of actions) {
+        if (act.locales) {
+          for (const code of Object.keys(act.locales)) {
+            if (!localeMap.has(code)) {
+              localeMap.set(code, code.toUpperCase());
+            }
+          }
+        }
+      }
+
+      const locales = Array.from(localeMap.entries()).map(([code, name]) => ({ code, name }));
       // Ensure English is listed first if present
       locales.sort((a, b) => (a.code === "en" ? -1 : b.code === "en" ? 1 : a.code.localeCompare(b.code)));
       res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
@@ -496,21 +708,45 @@ const server = createServer(async (req, res) => {
   // Single locale endpoint: e.g. /api/locales/en or /api/locales/ru
   if (url.pathname.startsWith("/api/locales/") && req.method === "GET") {
     const code = url.pathname.replace(/^\/api\/locales\//, "").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = join(LOCALES_DIR, `${code}.json`);
+    let filePath = join(LOCALES_DIR, `${code}.json`);
+    if (!existsSync(filePath)) {
+      filePath = join(LOCALES_DIR, "en.json");
+    }
+
+    let localeData = {};
     if (existsSync(filePath)) {
       try {
         const content = await readFileAsync(filePath, "utf-8");
-        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-        res.end(content);
-        return;
+        localeData = JSON.parse(content);
       } catch (err) {
         res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
         res.end(JSON.stringify({ error: err.message }));
         return;
       }
     }
-    res.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
-    res.end(JSON.stringify({ error: `Locale '${code}' not found` }));
+
+    if (!localeData.actions) {
+      localeData.actions = {};
+    }
+
+    // Merge discovered actions' localized data for this code
+    try {
+      const actions = await discoverActions();
+      for (const act of actions) {
+        const actLoc = act.locales?.[code] || act.locales?.["en"] || {};
+        localeData.actions[act.id] = actLoc;
+        if (act.aliases && Array.isArray(act.aliases)) {
+          for (const alias of act.aliases) {
+            localeData.actions[alias] = actLoc;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to merge action locales:", err);
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify(localeData));
     return;
   }
 

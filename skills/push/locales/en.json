@@ -1,0 +1,11 @@
+{
+  "name": "Push",
+  "desc": "/push — push committed changes to remote repository",
+  "placeholder": "Remote branch or flags, e.g. origin main (optional)",
+  "command": "/push",
+  "promptTemplate": "/push",
+  "promptTemplateWithInput": "/push {input}",
+  "prompt": "Push committed changes to the remote repository. Check current branch, verify unpushed commits, and execute git push.",
+  "promptWithInput": "Push committed changes to the remote repository for {input}. Check current branch, verify unpushed commits, and execute git push.",
+  "displayTitle": "⚡ Push"
+}

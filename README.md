@@ -25,7 +25,12 @@ A productivity plugin for Google Antigravity that adds one-click developer workf
 * `/push` — Safely pushes committed changes to the remote repository.
 * `/release` — Determines the next SemVer version, updates changelog, and creates an annotated Git tag.
 
-### 3. Suggested Prompt Chips
+### 3. Modular Architecture: Add Actions Easily via `skills/`
+You can add custom actions simply by creating subfolders in `skills/`:
+* Each subfolder is self-contained: provides `SKILL.md`, `action.json`, custom `icon.svg`, and localized strings (`locales/en.json`, `locales/ru.json`).
+* Dynamic discovery: newly created skills appear automatically on the Actions Panel with live-reload!
+
+### 4. Suggested Prompt Chips
 * Instant quick-action chips displayed in the Antigravity chat canvas.
 
 ---
@@ -67,6 +72,49 @@ git clone https://github.com/alezhu/antigravity-actions.git .agents/plugins/anti
 
 ---
 
+## Adding New Actions & Skills
+
+Adding a new action to the panel is as simple as creating a new folder in `skills/<skill-name>/`:
+
+```text
+skills/my-action/
+├── SKILL.md                 # Antigravity skill instructions
+├── action.json              # Action configuration (command, icon, order)
+├── icon.svg                 # SVG icon (or emoji in action.json)
+└── locales/
+    ├── en.json              # English action name, desc, prompts
+    └── ru.json              # Russian action name, desc, prompts
+```
+
+### `action.json` Example:
+```json
+{
+  "id": "my-action",
+  "command": "/my-action",
+  "order": 10,
+  "icon": "icon.svg",
+  "emoji": "⚡",
+  "hasInput": true
+}
+```
+
+### `locales/en.json` Example:
+```json
+{
+  "name": "My Action",
+  "desc": "/my-action — perform custom task",
+  "placeholder": "Arguments (optional)",
+  "displayTitle": "⚡ My Action",
+  "promptTemplate": "/my-action",
+  "promptTemplateWithInput": "/my-action {input}",
+  "prompt": "Full AI prompt instruction..."
+}
+```
+
+The Actions Panel automatically discovers new actions, loads their icons and translations, and live-reloads in real time!
+
+---
+
 ## Project Structure
 
 ```text
@@ -79,20 +127,24 @@ antigravity-actions/
 ├── README.ru.md                # Documentation (Russian)
 ├── assets/
 │   └── logo.svg                # Plugin icon
-├── skills/                     # Antigravity Skills
-│   ├── run-tests/SKILL.md
-│   ├── code-review/SKILL.md
-│   ├── commit/SKILL.md
-│   ├── push/SKILL.md
-│   └── release/SKILL.md
+├── skills/                     # Self-contained actions & skills
+│   ├── run-tests/              # Run Tests action
+│   │   ├── SKILL.md            # Skill instructions
+│   │   ├── action.json         # Action config
+│   │   ├── icon.svg            # Custom SVG icon
+│   │   └── locales/            # Localized strings (en.json, ru.json)
+│   ├── code-review/
+│   ├── commit/
+│   ├── push/
+│   └── release/
 └── sidecars/
     └── actions-panel/          # Sidecar Web UI
         ├── sidecar.json        # Sidecar declaration
         ├── server.mjs          # Standalone Node.js server
-        ├── locales/            # Localization dictionary files
-        │   ├── en.json         # English (default + fallback)
+        ├── locales/            # Core panel UI translations
+        │   ├── en.json         # English
         │   └── ru.json         # Russian
-        └── public/             # Web dashboard assets
+        └── public/             # Web dashboard frontend
             ├── index.html
             ├── style.css
             └── app.js

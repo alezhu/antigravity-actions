@@ -27,12 +27,15 @@ This skill automates release preparation following Semantic Versioning (SemVer).
    - Update version in `package.json`, `Cargo.toml`, `pyproject.toml`, `VERSION`, `plugin.json` or project equivalent.
 
 4. **Generate / Update CHANGELOG.md**:
-   - Add section for the new version with current date.
-   - Categorize entries:
-     - 🚀 Features
-     - 🐛 Bug Fixes
-     - ⚡ Performance Improvements
-     - 📝 Documentation & Maintenance
+   - Follow the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+   - Add section for the new version with current date (e.g., `## [X.Y.Z] - YYYY-MM-DD`).
+   - Group changes strictly into standard Keep a Changelog categories (omit empty categories):
+     - `### Added` for new features.
+     - `### Changed` for changes in existing functionality.
+     - `### Deprecated` for soon-to-be removed features.
+     - `### Removed` for now removed features.
+     - `### Fixed` for any bug fixes.
+     - `### Security` in case of vulnerabilities.
 
 5. **Create Release Commit, Git Tag & Push**:
    - Stage and commit: `git commit -am "chore(release): vX.Y.Z"`.

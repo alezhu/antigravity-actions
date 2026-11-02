@@ -1,0 +1,9 @@
+{
+  "id": "run-tests",
+  "aliases": ["test"],
+  "command": "/run-tests",
+  "order": 1,
+  "icon": "icon.svg",
+  "emoji": "🧪",
+  "hasInput": true
+}

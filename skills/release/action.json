@@ -1,0 +1,9 @@
+{
+  "id": "release",
+  "aliases": [],
+  "command": "/release",
+  "order": 5,
+  "icon": "icon.svg",
+  "emoji": "🏷️",
+  "hasInput": true
+}

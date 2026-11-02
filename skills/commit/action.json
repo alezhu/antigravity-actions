@@ -1,0 +1,9 @@
+{
+  "id": "commit",
+  "aliases": [],
+  "command": "/commit",
+  "order": 3,
+  "icon": "icon.svg",
+  "emoji": "📝",
+  "hasInput": true
+}

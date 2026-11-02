@@ -1,0 +1,11 @@
+{
+  "name": "Run Tests",
+  "desc": "/run-tests — run project test suite and diagnose failures",
+  "placeholder": "Test name or pattern (optional)",
+  "command": "/run-tests",
+  "promptTemplate": "/run-tests",
+  "promptTemplateWithInput": "/run-tests {input}",
+  "prompt": "Detect the project test framework, run the test suite, analyze any failures, explain root causes, and suggest fixes.",
+  "promptWithInput": "Detect the project test framework and run tests for {input}. Analyze any failures, explain root causes, and suggest fixes.",
+  "displayTitle": "⚡ Tests"
+}

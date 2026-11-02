@@ -1,0 +1,11 @@
+{
+  "name": "Commit",
+  "desc": "/commit — Conventional Commit по анализу git diff",
+  "placeholder": "Сообщение коммита (необязательно)",
+  "command": "/commit",
+  "promptTemplate": "/commit (отвечай на русском языке)",
+  "promptTemplateWithInput": "/commit \"{input}\" (отвечай на русском языке)",
+  "prompt": "Сделай коммит проиндексированных и измененных файлов с понятным сообщением по Conventional Commits. Проверь git diff и убедись в отсутствии секретов и временных файлов. Отвечай на русском языке.",
+  "promptWithInput": "Сделай коммит проиндексированных и измененных файлов с понятным сообщением по Conventional Commits. Сообщение: \"{input}\". Проверь git diff и убедись в отсутствии секретов и временных файлов. Отвечай на русском языке.",
+  "displayTitle": "⚡ Commit"
+}

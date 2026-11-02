@@ -1,0 +1,9 @@
+{
+  "id": "push",
+  "aliases": [],
+  "command": "/push",
+  "order": 4,
+  "icon": "icon.svg",
+  "emoji": "🚀",
+  "hasInput": true
+}

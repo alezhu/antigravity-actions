@@ -1,0 +1,11 @@
+{
+  "name": "Release",
+  "desc": "/release — SemVer calculation, changelog, and git tag",
+  "placeholder": "Bump type (patch, minor, major or version)",
+  "command": "/release",
+  "promptTemplate": "/release",
+  "promptTemplateWithInput": "/release {input}",
+  "prompt": "Prepare project release: analyze commit history since last tag, calculate SemVer bump, update changelog and manifest versions, and create git tag.",
+  "promptWithInput": "Prepare project release ({input}): analyze commit history since last tag, calculate SemVer bump, update changelog and manifest versions, and create git tag.",
+  "displayTitle": "⚡ Release"
+}

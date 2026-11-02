@@ -16,8 +16,10 @@ let activeStartTime = 0;
 let currentRunningAction = null;
 let currentTab = "commands";
 
-// Supported actions
-const ALL_ACTIONS = ["test", "codereview", "commit", "push", "release"];
+// Discovered actions from skills/ subdirectories
+let registeredActions = [];
+let ALL_ACTIONS = [];
+const aliasToIdMap = new Map();
 let hiddenActions = new Set();
 
 // i18n state
@@ -52,6 +54,147 @@ function t(path, vars = {}) {
   return String(val).replace(/\{(\w+)\}/g, (_, key) => (vars[key] !== undefined ? vars[key] : `{${key}}`));
 }
 
+// HTML escape helper
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Dynamically fetch discovered actions from server
+async function loadActions() {
+  try {
+    const res = await fetch("/api/actions");
+    if (res.ok) {
+      registeredActions = await res.json();
+    }
+  } catch (err) {
+    console.warn("Failed to load actions:", err);
+  }
+
+  ALL_ACTIONS = registeredActions.map(a => a.id);
+  aliasToIdMap.clear();
+  registeredActions.forEach(a => {
+    aliasToIdMap.set(a.id, a.id);
+    if (Array.isArray(a.aliases)) {
+      a.aliases.forEach(al => aliasToIdMap.set(al, a.id));
+    }
+  });
+}
+
+// Dynamically render action cards in Commands tab
+function renderActions() {
+  const container = getActionsContainer();
+  if (!container) return;
+
+  const previousInputs = {};
+  registeredActions.forEach(act => {
+    const el = document.getElementById(`input-${act.id}`);
+    if (el && el.value) previousInputs[act.id] = el.value;
+  });
+
+  container.innerHTML = "";
+
+  registeredActions.forEach(act => {
+    const actLocale = currentTranslations.actions?.[act.id] || fallbackTranslations.actions?.[act.id] || {};
+    const name = actLocale.name || act.id;
+    const desc = actLocale.desc || act.command || "";
+    const placeholder = actLocale.placeholder || "";
+
+    const card = document.createElement("div");
+    card.className = "action-card";
+    card.id = `card-${act.id}`;
+    card.setAttribute("data-action", act.id);
+    card.setAttribute("draggable", "true");
+
+    let iconHtml = "";
+    if (act.iconUrl) {
+      iconHtml = `<img src="${act.iconUrl}" class="action-icon-img" alt="${escapeHtml(name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';" /><span class="action-icon-fallback" style="display:none">${act.emoji || "⚡"}</span>`;
+    } else {
+      iconHtml = `<span>${act.emoji || "⚡"}</span>`;
+    }
+
+    let inputHtml = "";
+    if (act.hasInput !== false) {
+      const prevVal = previousInputs[act.id] || "";
+      inputHtml = `
+        <div class="action-inputs">
+          <input type="text" id="input-${act.id}" value="${escapeHtml(prevVal)}" placeholder="${escapeHtml(placeholder)}" />
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="action-header">
+        <span class="drag-handle" title="${escapeHtml(t("ui.dragHandleTitle"))}" aria-label="Drag to reorder">⠿</span>
+        <span class="action-icon">${iconHtml}</span>
+        <div class="action-info">
+          <span class="action-name">${escapeHtml(name)}</span>
+          <span class="action-desc">${escapeHtml(desc)}</span>
+        </div>
+        <button class="btn-hide-action" onclick="event.stopPropagation(); hideAction('${act.id}')" title="${escapeHtml(t("ui.btnHideActionTitle"))}" aria-label="Hide command">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </button>
+      </div>
+      ${inputHtml}
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-exec-${act.id}" onclick="handleAction('${act.id}', 'execute')" title="${escapeHtml(t("ui.btnExecuteTitle"))}">
+          ${escapeHtml(t("ui.btnExecute"))}
+        </button>
+        <button class="btn btn-secondary" onclick="handleAction('${act.id}', 'copy')" title="${escapeHtml(t("ui.btnCopyTitle"))}">
+          ${escapeHtml(t("ui.btnCopy"))}
+        </button>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// Dynamically render visibility items in Settings tab
+function renderVisibilityList() {
+  const visContainer = document.getElementById("visibilityList");
+  if (!visContainer) return;
+
+  visContainer.innerHTML = "";
+
+  registeredActions.forEach(act => {
+    const actLocale = currentTranslations.actions?.[act.id] || fallbackTranslations.actions?.[act.id] || {};
+    const name = actLocale.name || act.id;
+
+    let iconHtml = "";
+    if (act.iconUrl) {
+      iconHtml = `<img src="${act.iconUrl}" class="visibility-item-icon-img" alt="${escapeHtml(name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';" /><span style="display:none">${act.emoji || "⚡"}</span>`;
+    } else {
+      iconHtml = `<span>${act.emoji || "⚡"}</span>`;
+    }
+
+    const item = document.createElement("div");
+    item.className = "visibility-item";
+    item.innerHTML = `
+      <div class="visibility-item-left">
+        <span class="visibility-item-icon">${iconHtml}</span>
+        <div class="visibility-item-labels">
+          <span class="visibility-item-name">${escapeHtml(name)}</span>
+          <span class="visibility-item-cmd">${escapeHtml(act.command)}</span>
+        </div>
+      </div>
+      <label class="toggle-switch" title="Toggle ${escapeHtml(name)}">
+        <input type="checkbox" id="toggle-vis-${act.id}" ${hiddenActions.has(act.id) ? "" : "checked"} onchange="setActionVisibility('${act.id}', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    `;
+
+    visContainer.appendChild(item);
+  });
+}
+
 // Apply translations to all DOM elements marked with data-i18n attributes
 function applyTranslations() {
   document.documentElement.lang = currentLocale;
@@ -82,6 +225,15 @@ function applyTranslations() {
 
   if (langSelectEl) {
     langSelectEl.value = currentLocale;
+  }
+
+  // Update dynamic cards & visibility items
+  if (registeredActions.length > 0) {
+    renderActions();
+    renderVisibilityList();
+    restoreCardOrder();
+    applyActionVisibility();
+    initDragAndDrop();
   }
 }
 
@@ -218,7 +370,8 @@ function loadActionVisibility() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        hiddenActions = new Set(parsed.filter(id => ALL_ACTIONS.includes(id)));
+        const normalized = parsed.map(id => aliasToIdMap.get(id) || id);
+        hiddenActions = new Set(normalized.filter(id => ALL_ACTIONS.includes(id)));
       }
     }
   } catch (err) {
@@ -253,18 +406,20 @@ function applyActionVisibility() {
 
 function checkEmptyCommandsState() {
   if (!emptyCommandsStateEl) return;
-  const allHidden = ALL_ACTIONS.every(act => hiddenActions.has(act));
+  const allHidden = ALL_ACTIONS.length > 0 && ALL_ACTIONS.every(act => hiddenActions.has(act));
   emptyCommandsStateEl.classList.toggle("hidden", !allHidden);
 }
 
-function hideAction(action) {
+function hideAction(rawAction) {
+  const action = aliasToIdMap.get(rawAction) || rawAction;
   hiddenActions.add(action);
   saveActionVisibility();
   applyActionVisibility();
   showToast(t("ui.actionHiddenToast"));
 }
 
-function setActionVisibility(action, isVisible) {
+function setActionVisibility(rawAction, isVisible) {
+  const action = aliasToIdMap.get(rawAction) || rawAction;
   if (isVisible) {
     hiddenActions.delete(action);
   } else {
@@ -316,28 +471,24 @@ function showToast(message = "Done!", isError = false) {
 }
 
 // Build action command, prompt, title, and metadata taking active locale into account
-function getActionMeta(action) {
+function getActionMeta(rawAction) {
+  const action = aliasToIdMap.get(rawAction) || rawAction;
   const actionConfig = currentTranslations.actions?.[action] || fallbackTranslations.actions?.[action] || {};
   const fallbackConfig = fallbackTranslations.actions?.[action] || {};
 
-  let input = "";
-  switch (action) {
-    case "test":
-      input = document.getElementById("testInput")?.value.trim() || "";
-      break;
-    case "codereview":
-      input = document.getElementById("reviewInput")?.value.trim() || "";
-      break;
-    case "commit":
-      input = document.getElementById("commitInput")?.value.trim() || "";
-      break;
-    case "push":
-      input = document.getElementById("pushInput")?.value.trim() || "";
-      break;
-    case "release":
-      input = document.getElementById("releaseInput")?.value.trim() || "";
-      break;
+  let inputEl = document.getElementById(`input-${action}`) ||
+                document.getElementById(`input-${rawAction}`);
+
+  // Fallback to legacy IDs
+  if (!inputEl) {
+    if (action === "run-tests" || rawAction === "test") inputEl = document.getElementById("testInput");
+    else if (action === "code-review" || rawAction === "codereview") inputEl = document.getElementById("reviewInput");
+    else if (action === "commit") inputEl = document.getElementById("commitInput");
+    else if (action === "push") inputEl = document.getElementById("pushInput");
+    else if (action === "release") inputEl = document.getElementById("releaseInput");
   }
+
+  const input = inputEl ? inputEl.value.trim() : "";
 
   const defaultCmd = fallbackConfig.command || `/${action}`;
   const baseCmd = actionConfig.command || defaultCmd;
@@ -375,7 +526,8 @@ function getActionMeta(action) {
 }
 
 // Start visual execution indicator banner and elapsed timer
-function startRunningIndicator(action, meta, btn) {
+function startRunningIndicator(rawAction, meta, btn) {
+  const action = aliasToIdMap.get(rawAction) || rawAction;
   currentRunningAction = action;
   activeStartTime = Date.now();
 
@@ -389,7 +541,7 @@ function startRunningIndicator(action, meta, btn) {
 
   // Highlight specific action card
   document.querySelectorAll(".action-card").forEach(c => c.classList.remove("running"));
-  const card = document.getElementById(`card-${action}`);
+  const card = document.getElementById(`card-${action}`) || document.getElementById(`card-${rawAction}`);
   if (card) card.classList.add("running");
 
   // Disable all execute buttons while an action is in progress to prevent duplicate requests
@@ -600,7 +752,8 @@ async function copyToClipboard(text) {
 }
 
 // Main handler for action button modes
-async function handleAction(action, mode = "execute", btnElement = null) {
+async function handleAction(rawAction, mode = "execute", btnElement = null) {
+  const action = aliasToIdMap.get(rawAction) || rawAction;
   const meta = getActionMeta(action);
   if (!meta.cmd) return;
 
@@ -682,8 +835,6 @@ async function handleAction(action, mode = "execute", btnElement = null) {
 }
 
 // Actions Order & Drag-and-Drop Management
-const DEFAULT_ACTION_ORDER = ["test", "codereview", "commit", "push", "release"];
-
 function getActionsContainer() {
   return document.getElementById("actionsList") || document.querySelector(".actions-section");
 }
@@ -706,15 +857,17 @@ function restoreCardOrder() {
   const container = getActionsContainer();
   if (!container) return;
 
-  let order = DEFAULT_ACTION_ORDER;
+  let order = ALL_ACTIONS;
   try {
     const saved = localStorage.getItem("antigravity_actions_order");
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const validSaved = parsed.filter(act => DEFAULT_ACTION_ORDER.includes(act));
-        const missing = DEFAULT_ACTION_ORDER.filter(act => !validSaved.includes(act));
-        order = [...validSaved, ...missing];
+        const normalized = parsed.map(id => aliasToIdMap.get(id) || id);
+        const validSaved = normalized.filter(act => ALL_ACTIONS.includes(act));
+        const uniqueSaved = Array.from(new Set(validSaved));
+        const missing = ALL_ACTIONS.filter(act => !uniqueSaved.includes(act));
+        order = [...uniqueSaved, ...missing];
       }
     }
   } catch (err) {
@@ -774,18 +927,21 @@ function initDragAndDrop() {
     });
   });
 
-  container.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    if (!draggedCard) return;
+  if (!container._hasDragOverListener) {
+    container._hasDragOverListener = true;
+    container.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (!draggedCard) return;
 
-    const afterElement = getDragAfterElement(container, e.clientY);
-    if (afterElement == null) {
-      container.appendChild(draggedCard);
-    } else {
-      container.insertBefore(draggedCard, afterElement);
-    }
-  });
+      const afterElement = getDragAfterElement(container, e.clientY);
+      if (afterElement == null) {
+        container.appendChild(draggedCard);
+      } else {
+        container.insertBefore(draggedCard, afterElement);
+      }
+    });
+  }
 }
 
 // Live reload SSE listener
@@ -812,15 +968,13 @@ window.toggleAllCommands = toggleAllCommands;
 window.reloadPanel = () => window.location.reload();
 
 // Initialize on DOM load
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   try {
     localStorage.removeItem("antigravity_actions_active_tab");
   } catch {}
-  restoreCardOrder();
-  loadActionVisibility();
   switchTab("commands");
-  initDragAndDrop();
-  initI18n();
-  loadPluginInfo();
   initLiveReload();
+  await loadActions();
+  await initI18n();
+  loadPluginInfo();
 });

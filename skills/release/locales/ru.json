@@ -1,0 +1,11 @@
+{
+  "name": "Release",
+  "desc": "/release — расчет SemVer, changelog и git-тег",
+  "placeholder": "Тип бампа (patch, minor, major или версия)",
+  "command": "/release",
+  "promptTemplate": "/release (отвечай на русском языке)",
+  "promptTemplateWithInput": "/release {input} (отвечай на русском языке)",
+  "prompt": "Подготовь выпуск релиза: проанализируй историю коммитов с последнего тега, определи версию по SemVer, обнови changelog и манифесты, создай Git-тег. Отвечай на русском языке.",
+  "promptWithInput": "Подготовь выпуск релиза ({input}): проанализируй историю коммитов с последнего тега, определи версию по SemVer, обнови changelog и манифесты, создай Git-тег. Отвечай на русском языке.",
+  "displayTitle": "⚡ Release"
+}

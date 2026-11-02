@@ -433,6 +433,21 @@ h1 {
 
 .action-icon {
   font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.action-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .action-info {
@@ -727,6 +742,21 @@ h1 {
 
 .visibility-item-icon {
   font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.visibility-item-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .visibility-item-labels {

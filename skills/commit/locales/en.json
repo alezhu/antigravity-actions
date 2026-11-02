@@ -1,0 +1,11 @@
+{
+  "name": "Commit",
+  "desc": "/commit — Conventional Commit based on git diff analysis",
+  "placeholder": "Commit message (optional)",
+  "command": "/commit",
+  "promptTemplate": "/commit",
+  "promptTemplateWithInput": "/commit \"{input}\"",
+  "prompt": "Commit staged and modified changes with a Conventional Commit message. Inspect git diff and verify that no secrets or temporary files are included.",
+  "promptWithInput": "Commit staged and modified changes with a Conventional Commit message. Message: \"{input}\". Inspect git diff and verify that no secrets or temporary files are included.",
+  "displayTitle": "⚡ Commit"
+}

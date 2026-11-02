@@ -1,0 +1,11 @@
+{
+  "name": "Code Review",
+  "desc": "/code-review — deep review of changes, bugs, and code style",
+  "placeholder": "Files or branch to review (optional)",
+  "command": "/code-review",
+  "promptTemplate": "/code-review",
+  "promptTemplateWithInput": "/code-review {input}",
+  "prompt": "Perform a deep Code Review of uncommitted changes and current diff. Check logic correctness, security vulnerabilities, edge cases, performance, and code style.",
+  "promptWithInput": "Perform a deep Code Review of {input}. Check logic correctness, security vulnerabilities, edge cases, performance, and code style.",
+  "displayTitle": "⚡ Code Review"
+}

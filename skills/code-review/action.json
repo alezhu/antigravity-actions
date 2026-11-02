@@ -1,0 +1,9 @@
+{
+  "id": "code-review",
+  "aliases": ["codereview"],
+  "command": "/code-review",
+  "order": 2,
+  "icon": "icon.svg",
+  "emoji": "🔍",
+  "hasInput": true
+}

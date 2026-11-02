@@ -34,7 +34,7 @@ This skill automates release preparation following Semantic Versioning (SemVer).
      - ⚡ Performance Improvements
      - 📝 Documentation & Maintenance
 
-5. **Create Release Commit & Git Tag**:
+5. **Create Release Commit, Git Tag & Push**:
    - Stage and commit: `git commit -am "chore(release): vX.Y.Z"`.
    - Create annotated tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
-   - Remind the user to push the release: `git push origin && git push origin --tags`. (Do not push autonomously).
+   - Push release and tags to remote: `git push origin && git push origin --tags`.
